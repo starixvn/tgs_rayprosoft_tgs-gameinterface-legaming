@@ -95,7 +95,7 @@ internal class GameRecordApiClient : IGameRecordApiClient
         var revenues = list["Revenue"]!.AsArray().Select(x => Convert.ToDecimal(x!.ToString()));
         var gameStartTimes = list["GameStartTime"]!.AsArray().Select(x => x!.ToString().StringConvertDateTimeOffset());
         var gameEndTimes = list["GameEndTime"]!.AsArray().Select(x => x!.ToString().StringConvertDateTimeOffset());
-        var cardValues = list["CardValue"]!.AsArray().Select(x => x!.ToString());
+        var cardValues = list["CardValue"]!.AsArray().Select(x => (x is null) ? string.Empty : x!.ToString());
         var channelIDs = list["ChannelID"]!.AsArray().Select(x => Convert.ToInt32(x!.ToString()));
         var lineCodes = list["LineCode"]!.AsArray().Select(x => x!.ToString());
 

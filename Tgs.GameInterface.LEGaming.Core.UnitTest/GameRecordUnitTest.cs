@@ -331,4 +331,152 @@ public class GameRecordUnitTest
             .AsTask())
             .ConfigureAwait(false);
     }
+
+    [Fact]
+    public async void Fishing()
+    {
+        Uri apiUrl = new Uri("https://wc1-record.kewmn686.com/");
+        var deskey = "706EB65DD6E6DF4C";
+        var md5key = "3E00054B89B31B7A";
+        var agentId = "200995";
+        var startTime = DateTimeOffset.FromUnixTimeMilliseconds(1689673800000);
+        var endTime = DateTimeOffset.FromUnixTimeMilliseconds(1689674400000);
+
+        var fakeCryptography = Substitute.For<IHashCryptography>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+
+        var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689674616995);
+        _ = fakeSystemClock.CurrentTime.Returns(currentTime);
+
+        var data = "s=6&startTime=1689673800000&endTime=1689674400000";
+        var param = "IvzEoNbMqRigzbXIyXr57Krg02ozH119Vi6VYTEUdnoRYjq/jj6ecM59xxQrSOT8QaUG2zsAqsctjCu/8MMYqg==";
+        _ = fakeCryptography.GetAesEncryptAsync(
+            data: Arg.Is(data),
+            secretKey: Arg.Is(deskey),
+            cancellationToken: Arg.Any<CancellationToken>())
+            .Returns(param);
+
+        var dataMD5 = $"{agentId}{currentTime.ToUnixTimeMilliseconds()}{md5key}";
+        var key = "277009dcb518974deafe266c31564db8";
+        _ = fakeCryptography.GetHash(
+            data: Arg.Is(dataMD5))
+            .Returns(key);
+
+        var uriBuilder = new UriBuilder(new Uri(apiUrl, "/getRecordHandle"));
+        var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+        query["agent"] = agentId;
+        query["timestamp"] = currentTime.ToUnixTimeMilliseconds().ToString();
+        query["param"] = param;
+        query["key"] = key;
+        uriBuilder.Query = query.ToString();
+
+        var response = new JsonObject
+        {
+            ["m"] = "/getRecordHandle",
+            ["s"] = 106,
+            ["d"] = new JsonObject
+            {
+                ["code"] = 0,
+                ["start"] = 1689673800000,
+                ["end"] = 1689674400000,
+                ["count"] = 1,
+                ["list"] = new JsonObject
+                {
+                    ["GameID"] = new JsonArray {
+                        "686-1689673771-18434286-1"
+                    },
+                    ["Accounts"] = new JsonArray {
+                        "200995_4uk9399rb9qo"
+                    },
+                    ["ServerID"] = new JsonArray {
+                        5101
+                    },
+                    ["KindID"] = new JsonArray {
+                        510
+                    },
+                    ["TableID"] = new JsonArray {
+                        102020001
+                    },
+                    ["ChairID"] = new JsonArray {
+                        0
+                    },
+                    ["UserCount"] = new JsonArray {
+                        1
+                    },
+                    ["CellScore"] = new JsonArray {
+                        "3.80"
+                    },
+                    ["AllBet"] = new JsonArray {
+                        "3.80"
+                    },
+                    ["Profit"] = new JsonArray {
+                        "-1.80"
+                    },
+                    ["Revenue"] = new JsonArray {
+                        "0.00"
+                    },
+                    ["GameStartTime"] = new JsonArray {
+                        "2023-07-18 17:49:31"
+                    },
+                    ["GameEndTime"] = new JsonArray {
+                        "2023-07-18 17:50:01"
+                    },
+                    ["CardValue"] = new JsonArray {
+                        null
+                    },
+                    ["ChannelID"] = new JsonArray {
+                        200995
+                    },
+                    ["LineCode"] = new JsonArray {
+                        "200995_GPI_HKD"
+                    }
+                }
+            }
+        };
+
+        var handler = new MockHttpMessageHandler();
+        _ = handler
+            .Expect(HttpMethod.Get, uriBuilder.ToString())
+            .Respond(HttpStatusCode.OK, new StringContent(response.ToJsonString(), Encoding.UTF8, MediaTypeNames.Application.Json));
+
+        var fakeHttpClient = handler.ToHttpClient();
+        var fakeLog = NullLogger<GameRecordApiClient>.Instance;
+
+        var client = new GameRecordApiClient(
+            fakeLog,
+            fakeCryptography,
+            fakeSystemClock,
+            fakeHttpClient);
+
+        var actual = await client
+            .GameRecordAsync(
+            apiUrl: apiUrl,
+            deskey: deskey,
+            md5key: md5key,
+            agentId: agentId,
+            startTime: startTime,
+            endTime: endTime,
+            retrySeconds: 1)
+            .ToArrayAsync()
+            .ConfigureAwait(false);
+
+        Assert.NotNull(actual);
+        Assert.True(actual.Any());
+        Assert.Equal("686-1689673771-18434286-1", actual.First().GameID);
+        Assert.Equal("4uk9399rb9qo", actual.First().Account);
+        Assert.Equal(5101, actual.First().ServerID);
+        Assert.Equal(510, actual.First().KindID);
+        Assert.Equal(102020001, actual.First().TableID);
+        Assert.Equal(0, actual.First().ChairID);
+        Assert.Equal(1, actual.First().UserCount);
+        Assert.Equal(3.80m, actual.First().CellScore);
+        Assert.Equal(3.80m, actual.First().AllBet);
+        Assert.Equal(-1.80m, actual.First().Profit);
+        Assert.Equal(0.00m, actual.First().Revenue);
+        Assert.Equal(DateTimeOffset.Parse("2023-07-18T17:49:31+08:00"), actual.First().GameStartTime);
+        Assert.Equal(DateTimeOffset.Parse("2023-07-18T17:50:01+08:00"), actual.First().GameEndTime);
+        Assert.Equal(string.Empty, actual.First().CardValue);
+        Assert.Equal(200995, actual.First().ChannelID);
+        Assert.Equal("200995_GPI_HKD", actual.First().LineCode);
+    }
 }
