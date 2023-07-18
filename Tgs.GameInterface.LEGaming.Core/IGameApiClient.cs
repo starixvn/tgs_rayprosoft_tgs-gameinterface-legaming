@@ -1,0 +1,18 @@
+﻿using Tgs.GameInterface.LEGaming.Core.Models;
+
+namespace Tgs.GameInterface.LEGaming.Core;
+
+public interface IGameApiClient
+{
+    ValueTask<bool> OrderStatusAsync(Uri apiUrl, string deskey, string md5key, string agentId, string orderId, CancellationToken cancellationToken = default);
+
+    ValueTask<string> WithdrawalAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, decimal money, CancellationToken cancellationToken = default);
+
+    ValueTask<string> DepositAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, decimal money, CancellationToken cancellationToken = default);
+
+    ValueTask<BalanceInfo> BalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, CancellationToken cancellationToken = default);
+
+    ValueTask<string> LoginAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, string ipAddress, string lineCode, string gameExternalID, CancellationToken cancellationToken = default);
+
+    ValueTask LogoutAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, CancellationToken cancellationToken = default);
+}

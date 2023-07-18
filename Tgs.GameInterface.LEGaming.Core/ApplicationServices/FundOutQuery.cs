@@ -1,0 +1,9 @@
+﻿namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
+
+public record FundOutQuery(
+    Uri ApiUrl,
+    string Deskey,
+    string MD5key,
+    string AgentId,
+    string PlayerCode,
+    decimal Amount);
