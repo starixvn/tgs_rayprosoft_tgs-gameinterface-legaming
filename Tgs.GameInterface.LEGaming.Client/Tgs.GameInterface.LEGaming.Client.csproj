@@ -4,6 +4,15 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<Version>0.0.1</Version>
+		<Authors>Raypro</Authors>
+		<RootNamespace>Tgs.GameInterface.LEGaming.Client</RootNamespace>
+		<PackageId>Tgs.GameInterface.LEGaming.Client</PackageId>
+		<Title>Tgs.GameInterface.LEGaming.Client</Title>
+		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-legaming</PackageProjectUrl>
+		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-legaming.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Tgs GameInterface LEGaming Client</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>

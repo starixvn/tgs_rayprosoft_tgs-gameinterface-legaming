@@ -2,8 +2,17 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
-		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Version>0.0.6</Version>
+		<Authors>Raypro</Authors>
+		<RootNamespace>Tgs.GameInterface.WGViaGaming.Client</RootNamespace>
+		<PackageId>Tgs.GameInterface.WGViaGaming.Client</PackageId>
+		<Title>Tgs.GameInterface.WGViaGaming.Client</Title>
+		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-wgviagaming</PackageProjectUrl>
+		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-wgviagaming.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Tgs GameInterface WGViaGaming Client</PackageTags>
 	</PropertyGroup>
 
 	<PropertyGroup>
