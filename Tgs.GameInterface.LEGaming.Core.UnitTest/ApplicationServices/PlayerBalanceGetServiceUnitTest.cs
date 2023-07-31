@@ -42,6 +42,6 @@ public class PlayerBalanceGetServiceUnitTest
         Assert.NotNull(actual);
         Assert.Equal(100, actual.Balance);
         Assert.Equal(98, actual.FreeBalance);
-        Assert.Equal(2, actual.LockBalance);
+        Assert.Equal(2, actual.OutstandingBalance);
     }
 }

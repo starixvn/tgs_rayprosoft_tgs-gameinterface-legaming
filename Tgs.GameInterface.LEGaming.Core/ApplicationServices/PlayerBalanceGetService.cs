@@ -25,9 +25,10 @@ public class PlayerBalanceGetService : IGetService<PlayerBalanceQuery, PlayerBal
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        return new PlayerBalanceResult(
-           LockBalance: info.TotalMoney - info.FreeMoney,
-           FreeBalance: info.FreeMoney,
-           Balance: info.TotalMoney);
+        return new PlayerBalanceResult
+        {
+            Balance = info.TotalMoney,
+            FreeBalance = info.FreeMoney
+        };
     }
 }
