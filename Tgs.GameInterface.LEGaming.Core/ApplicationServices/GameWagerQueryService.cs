@@ -4,18 +4,18 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
 
-internal class GameRecordQueryService : IQueryService<GameRecordQuery, GameRecordResult>
+internal class GameWagerQueryService : IQueryService<GameWagerQuery, GameWagerResult>
 {
     private readonly IGameRecordApiClient _client;
 
-    public GameRecordQueryService(
+    public GameWagerQueryService(
         IGameRecordApiClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async IAsyncEnumerable<GameRecordResult> QueryAsync(
-        GameRecordQuery query,
+    public async IAsyncEnumerable<GameWagerResult> QueryAsync(
+        GameWagerQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var gameRecords = await _client
@@ -39,17 +39,16 @@ internal class GameRecordQueryService : IQueryService<GameRecordQuery, GameRecor
 
         foreach (var gameRecord in gameRecords)
         {
-            yield return new GameRecordResult(
-                ExternalRoundId: gameRecord.GameID,
+            yield return new GameWagerResult(
+                ExternalWagerId: gameRecord.GameID,
                 ExternalGameId: gameRecord.KindID.ToString(),
                 PlayerCode: gameRecord.Account,
                 ExternalCreatedOn: gameRecord.GameStartTime,
                 ExternalClosedOn: gameRecord.GameEndTime,
                 Bet: gameRecord.AllBet,
-                ValidBet: gameRecord.AllBet,
+                ValidBet: gameRecord.CellScore,
                 Settle: gameRecord.AllBet + gameRecord.Profit,
                 Commission: gameRecord.Revenue,
-                Turnover: gameRecord.CellScore,
                 WinLoss: gameRecord.Profit,
                 AdditionalData: gameRecord.AdditionalData);
         }

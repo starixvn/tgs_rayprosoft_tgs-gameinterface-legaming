@@ -78,7 +78,6 @@ public class LogoutUnitTest
             deskey: deskey,
             md5key: md5key,
             agentId: agentId,
-            account: account)
-            .ConfigureAwait(false);
+            account: account);
     }
 }

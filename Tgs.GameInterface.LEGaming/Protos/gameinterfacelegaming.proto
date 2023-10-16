@@ -16,7 +16,8 @@ service GameInterfaceLEGaming {
   rpc FundOut (FundRequest) returns (FundReply);
   rpc FundStatus(FundStatusRequest) returns (BaseReply);
   rpc GameUrl (GameUrlRequest) returns (GameUrlReply);
-  rpc GameRecord (GameRecordRequest) returns (GameRecordReply);
+  rpc GameWager (GameWagerRequest) returns (GameWagerReply);
+  rpc AgentBalance (AgentBalanceRequest) returns (AgentBalanceReply);
   rpc CheckingService(CheckingServiceRequest) returns (CheckingServiceReply);
 }
 
@@ -27,6 +28,13 @@ message PlayerBalanceRequest {
 	string m_d5key = 3;
 	string agent_id = 4;
 	string player_code = 5;
+}
+
+message AgentBalanceRequest {
+	string api_url = 1;
+	string deskey = 2;
+	string m_d5key = 3;
+	string agent_id = 4;
 }
 
 message PlayerLogoutRequest {
@@ -43,7 +51,8 @@ message FundRequest {
 	string m_d5key = 3;
 	string agent_id = 4;
 	string player_code = 5;
-	phoenix.protobuf.DecimalValue amount = 6;
+	string order_id = 6;
+	phoenix.protobuf.DecimalValue amount = 7;
 }
 
 message FundStatusRequest {
@@ -62,10 +71,10 @@ message GameUrlRequest {
 	string brand_code = 5;
 	string player_code = 6;
 	string ip_address = 7;
-	string game_external_id = 8;
+	string external_game_id = 8;
 }
 
-message GameRecordRequest {
+message GameWagerRequest {
 	string api_url = 1;
 	string deskey = 2;
 	string m_d5key = 3;
@@ -89,20 +98,24 @@ message PlayerBalanceReply {
 	phoenix.protobuf.DecimalValue outstanding_balance = 3;
 }
 
+message AgentBalanceReply {
+	phoenix.protobuf.DecimalValue credit = 1;
+}
+
 message FundReply {
-	string order_id = 1;
+	string resp = 1;
 }
 
 message GameUrlReply{
 	string game_url = 1;
 }
 
-message GameRecordReply {
-	repeated GameRecordInfo items = 1;
+message GameWagerReply {
+	repeated GameWagerInfo items = 1;
 }
 
-message GameRecordInfo {
-	string external_round_id = 1;
+message GameWagerInfo {
+	string external_wager_id = 1;
 	string external_game_id = 2;
     string player_code = 3;
 	google.protobuf.Timestamp external_created_on = 4;
@@ -111,9 +124,8 @@ message GameRecordInfo {
 	phoenix.protobuf.DecimalValue valid_bet = 7;
 	phoenix.protobuf.DecimalValue settle = 8;
 	phoenix.protobuf.DecimalValue commission = 9;
-	phoenix.protobuf.DecimalValue turnover = 10;
-	phoenix.protobuf.DecimalValue win_loss = 11;
-	string additional_data = 12;
+	phoenix.protobuf.DecimalValue win_loss = 10;
+	string additional_data = 11;
 }
 
 message CheckingServiceReply{

@@ -25,8 +25,7 @@ public class HashCryptographyUnitTest
         var actual = await hashCryptography
             .GetAesEncryptAsync(
             data: data,
-            secretKey: secretKey)
-            .ConfigureAwait(false);
+            secretKey: secretKey);
 
         Assert.NotNull(actual);
         Assert.Equal("LxLJVtx15H2dgXaCSJNG9OQRmoSZ5fdqQNxK502gobo=", actual);
@@ -41,8 +40,7 @@ public class HashCryptographyUnitTest
         var actual = await hashCryptography
             .GetAesEncryptAsync(
             data: data,
-            secretKey: secretKey)
-            .ConfigureAwait(false);
+            secretKey: secretKey);
 
         Assert.NotNull(actual);
         Assert.Equal("9BKbWenbOpD7JD8jm2XOGBvbOmN+DvjUOwUBxG823tJfp1dhN6KO4zZMsa282vQOVNulFLKFd7kOfV9aycegC30o5d0qyzK3JSKSeG0Xe/8=", actual);
@@ -53,12 +51,11 @@ public class HashCryptographyUnitTest
     {
         var hashCryptography = new HashCryptography();
         var secretKey = "706EB65DD6E6DF4C";
-        var data = $"s={(int)SubTypes.Withdrawal}&account=4uk9399rb9qo&orderid=200995202307171354537634uk9399rb9qo&money=1";
+        var data = $"s={(int)SubTypes.Withdraw}&account=4uk9399rb9qo&orderid=200995202307171354537634uk9399rb9qo&money=1";
         var actual = await hashCryptography
             .GetAesEncryptAsync(
             data: data,
-            secretKey: secretKey)
-            .ConfigureAwait(false);
+            secretKey: secretKey);
 
         Assert.NotNull(actual);
         Assert.Equal("GH0Qljygg7xF2c6Y96voiRvbOmN+DvjUOwUBxG823tJfp1dhN6KO4zZMsa282vQOhlWfJZ94ir3aDkBPGR+Vz30o5d0qyzK3JSKSeG0Xe/8=", actual);
@@ -73,8 +70,7 @@ public class HashCryptographyUnitTest
         var actual = await hashCryptography
             .GetAesEncryptAsync(
             data: data,
-            secretKey: secretKey)
-            .ConfigureAwait(false);
+            secretKey: secretKey);
 
         Assert.NotNull(actual);
         Assert.Equal("HQN9/G1xjatVFubjmWOt1qOD/F6kv2maQn09UTu/K8Wqcq16IBeEvLm3txrRJ8R8mSI2cnhHXmaAKiyWYjcvq50w9Kig2V9UKrPRprh4M+W5ernt8A5sSP0bq/WC/qJNKe8erVKIK0eFDUbnEgezppaGVQasxG/TJJBqRn0Chdc=", actual);
@@ -89,8 +85,7 @@ public class HashCryptographyUnitTest
         var actual = await hashCryptography
             .GetAesEncryptAsync(
             data: data,
-            secretKey: secretKey)
-            .ConfigureAwait(false);
+            secretKey: secretKey);
 
         Assert.NotNull(actual);
         Assert.Equal("IvzEoNbMqRigzbXIyXr57C7DgbNK7cg3KxNUVy2ADR2MXV3MvhfBT75ritJ9mEBeQaUG2zsAqsctjCu/8MMYqg==", actual);

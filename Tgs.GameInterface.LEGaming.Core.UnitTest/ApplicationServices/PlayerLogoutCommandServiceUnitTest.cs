@@ -17,13 +17,9 @@ public class PlayerLogoutCommandServiceUnitTest
 
         var fakeClient = Substitute.For<IGameApiClient>();
 
-        var service = new PlayerLogoutCommandService(
-            fakeClient);
+        var service = new PlayerLogoutCommandService(fakeClient);
 
-        await service
-            .ExecuteAsync(
-            command: command)
-            .ConfigureAwait(false);
+        await service.ExecuteAsync(command: command);
 
         _ = fakeClient
             .Received(1)

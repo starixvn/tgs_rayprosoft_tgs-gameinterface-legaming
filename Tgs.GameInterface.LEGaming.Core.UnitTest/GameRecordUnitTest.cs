@@ -152,8 +152,7 @@ public class GameRecordUnitTest
             startTime: startTime,
             endTime: endTime,
             retrySeconds: 1)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+            .ToArrayAsync();
 
         Assert.NotNull(actual);
         Assert.True(actual.Any());
@@ -248,8 +247,7 @@ public class GameRecordUnitTest
             startTime: startTime,
             endTime: endTime,
             retrySeconds: 1)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+            .ToArrayAsync();
 
         Assert.NotNull(actual);
         Assert.False(actual.Any());
@@ -317,7 +315,7 @@ public class GameRecordUnitTest
             fakeSystemClock,
             fakeHttpClient);
 
-        _ = await Assert.ThrowsAsync<HttpRequestException>(
+        _ = await Assert.ThrowsAsync<MockHttpMatchException>(
             () => client
             .GameRecordAsync(
                 apiUrl: apiUrl,
@@ -328,8 +326,7 @@ public class GameRecordUnitTest
                 endTime: endTime,
                 retrySeconds: 1)
             .ToArrayAsync()
-            .AsTask())
-            .ConfigureAwait(false);
+            .AsTask());
     }
 
     [Fact]
@@ -457,8 +454,7 @@ public class GameRecordUnitTest
             startTime: startTime,
             endTime: endTime,
             retrySeconds: 1)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+            .ToArrayAsync();
 
         Assert.NotNull(actual);
         Assert.True(actual.Any());

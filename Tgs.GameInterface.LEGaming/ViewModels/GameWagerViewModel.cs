@@ -2,7 +2,7 @@
 
 namespace Tgs.GameInterface.LEGaming.ViewModels;
 
-public record GameRecordViewModel
+public record GameWagerViewModel
 {
     [Required]
     public Uri ApiUrl { get; init; } = default!;

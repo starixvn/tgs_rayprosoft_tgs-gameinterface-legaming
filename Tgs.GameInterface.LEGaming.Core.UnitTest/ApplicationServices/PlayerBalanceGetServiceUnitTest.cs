@@ -31,13 +31,9 @@ public class PlayerBalanceGetServiceUnitTest
             Arg.Any<CancellationToken>())
             .Returns(info);
 
-        var service = new PlayerBalanceGetService(
-            fakeClient);
+        var service = new PlayerBalanceGetService(fakeClient);
 
-        var actual = await service
-            .GetAsync(
-            query: query)
-            .ConfigureAwait(false);
+        var actual = await service.GetAsync(query: query);
 
         Assert.NotNull(actual);
         Assert.Equal(100, actual.Balance);

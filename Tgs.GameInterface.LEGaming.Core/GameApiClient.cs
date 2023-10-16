@@ -28,13 +28,27 @@ internal class GameApiClient : IGameApiClient
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async ValueTask<BalanceInfo> BalanceAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string account,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<decimal> AgentBalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, CancellationToken cancellationToken = default)
+    {
+        var data = $"s={(int)SubTypes.AgentBalance}";
+        var jsonNode = await GetAsync(
+            apiUrl: apiUrl,
+            types: SubTypes.AgentBalance,
+            deskey: deskey,
+            md5key: md5key,
+            agentId: agentId,
+            data: data,
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        var dataResponse = jsonNode["d"]!;
+
+        return dataResponse["code"]!.GetValue<int>() != 0
+            ? throw new ReturnCodeException(dataResponse["code"]!.GetValue<int>())
+            : decimal.Parse(jsonNode["d"]!["money"]!.ToString());
+    }
+
+    public async ValueTask<BalanceInfo> BalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, CancellationToken cancellationToken = default)
     {
         var subTypes = SubTypes.Balance;
         var data = $"s={(int)subTypes}&account={account}";
@@ -56,17 +70,9 @@ internal class GameApiClient : IGameApiClient
             dataResponse["freeMoney"]!.GetValue<decimal>());
     }
 
-    public async ValueTask<string> DepositAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string account,
-        decimal money,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<DepositResp> DepositAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, string orderId, decimal money, CancellationToken cancellationToken = default)
     {
         var subTypes = SubTypes.Deposit;
-        var orderId = $"{agentId}{_systemClock.CurrentTime:yyyyMMddHHmmssfff}{account}";
         var data = $"s={(int)subTypes}&account={account}&money={money}&orderid={orderId}";
         var jsonNode = await GetAsync(
             apiUrl: apiUrl,
@@ -79,26 +85,18 @@ internal class GameApiClient : IGameApiClient
             .ConfigureAwait(false);
 
         var dataResponse = jsonNode["d"]!;
+
         return dataResponse["code"]!.GetValue<int>() != 0
             ? throw new ReturnCodeException(dataResponse["code"]!.GetValue<int>())
-            : orderId;
+            : new DepositResp(jsonNode.ToJsonString());
     }
 
-    public async ValueTask<string> LoginAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string account,
-        string ipAddress,
-        string lineCode,
-        string gameExternalID,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<string> LoginAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, string ipAddress, string lineCode, string kindID, CancellationToken cancellationToken = default)
 
     {
         var subTypes = SubTypes.Login;
         var orderId = $"{agentId}{_systemClock.CurrentTime:yyyyMMddHHmmssfff}{account}";
-        var data = $"s={(int)subTypes}&account={account}&money=0&orderid={orderId}&ip={ipAddress}&lineCode={lineCode}&KindID={gameExternalID}";
+        var data = $"s={(int)subTypes}&account={account}&money=0&orderid={orderId}&ip={ipAddress}&lineCode={lineCode}&KindID={kindID}";
         var jsonNode = await GetAsync(
             apiUrl: apiUrl,
             types: subTypes,
@@ -115,13 +113,7 @@ internal class GameApiClient : IGameApiClient
             : dataResponse["url"]!.GetValue<string>();
     }
 
-    public async ValueTask LogoutAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string account,
-        CancellationToken cancellationToken = default)
+    public async ValueTask LogoutAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, CancellationToken cancellationToken = default)
     {
         var subTypes = SubTypes.Logout;
         var data = $"s={(int)subTypes}&account={account}";
@@ -142,13 +134,7 @@ internal class GameApiClient : IGameApiClient
         }
     }
 
-    public async ValueTask<bool> OrderStatusAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string orderId,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<bool> OrderStatusAsync(Uri apiUrl, string deskey, string md5key, string agentId, string orderId, CancellationToken cancellationToken = default)
 
     {
         var subTypes = SubTypes.OrderStatus;
@@ -171,18 +157,10 @@ internal class GameApiClient : IGameApiClient
                 : dataResponse["status"]!.GetValue<int>() == 0;
     }
 
-    public async ValueTask<string> WithdrawalAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string account,
-        decimal money,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<WithdrawResp> WithdrawAsync(Uri apiUrl, string deskey, string md5key, string agentId, string account, string orderId, decimal money, CancellationToken cancellationToken = default)
 
     {
-        var subTypes = SubTypes.Withdrawal;
-        var orderId = $"{agentId}{_systemClock.CurrentTime:yyyyMMddHHmmssfff}{account}";
+        var subTypes = SubTypes.Withdraw;
         var data = $"s={(int)subTypes}&account={account}&money={money}&orderid={orderId}";
         var jsonNode = await GetAsync(
             apiUrl: apiUrl,
@@ -195,19 +173,13 @@ internal class GameApiClient : IGameApiClient
             .ConfigureAwait(false);
 
         var dataResponse = jsonNode["d"]!;
+
         return dataResponse["code"]!.GetValue<int>() != 0
             ? throw new ReturnCodeException(dataResponse["code"]!.GetValue<int>())
-            : orderId;
+            : new WithdrawResp(jsonNode.ToJsonString());
     }
 
-    private async ValueTask<JsonNode> GetAsync(
-        Uri apiUrl,
-        SubTypes types,
-        string deskey,
-        string md5key,
-        string agentId,
-        string data,
-        CancellationToken cancellationToken = default)
+    private async ValueTask<JsonNode> GetAsync(Uri apiUrl, SubTypes types, string deskey, string md5key, string agentId, string data, CancellationToken cancellationToken = default)
     {
         var timestamp = _systemClock.CurrentTime.ToUnixTimeMilliseconds();
         var uriBuilder = new UriBuilder(new Uri(apiUrl, "/channelHandle"));

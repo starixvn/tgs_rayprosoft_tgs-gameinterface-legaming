@@ -8,33 +8,56 @@ namespace Tgs.GameInterface.LEGaming.GrpcServices;
 
 public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterfaceLEGamingBase
 {
-    private readonly IGetService<FundInQuery, string> _fundInService;
-    private readonly IGetService<FundOutQuery, string> _fundOutService;
+    private readonly IGetService<FundInQuery, FundResult> _fundInService;
+    private readonly IGetService<FundOutQuery, FundResult> _fundOutService;
     private readonly IGetService<FundStatusQuery, bool> _fundStatusService;
-    private readonly IQueryService<GameRecordQuery, GameRecordResult> _gameRecordService;
+    private readonly IQueryService<GameWagerQuery, GameWagerResult> _gameWagerService;
     private readonly IGetService<GameUrlQuery, string> _gameUrlService;
     private readonly ILogger<GameInterfaceLEGamingGrpcService> _logger;
     private readonly IGetService<PlayerBalanceQuery, PlayerBalanceResult> _playerBalanceService;
     private readonly ICommandService<PlayerLogoutCommand> _playerLogoutService;
+    private readonly IGetService<AgentBalanceQuery, AgentBalanceResult> _agentBalanceService;
 
     public GameInterfaceLEGamingGrpcService(
         ILogger<GameInterfaceLEGamingGrpcService> logger,
-        IGetService<FundInQuery, string> fundInService,
-        IGetService<FundOutQuery, string> fundOutService,
+        IGetService<FundInQuery, FundResult> fundInService,
+        IGetService<FundOutQuery, FundResult> fundOutService,
         IGetService<FundStatusQuery, bool> fundStatusService,
-        IQueryService<GameRecordQuery, GameRecordResult> gameRecordService,
+        IQueryService<GameWagerQuery, GameWagerResult> gameWagerService,
         IGetService<GameUrlQuery, string> gameUrlService,
         IGetService<PlayerBalanceQuery, PlayerBalanceResult> playerBalanceService,
-        ICommandService<PlayerLogoutCommand> PlayerLogoutService)
+        ICommandService<PlayerLogoutCommand> PlayerLogoutService,
+        IGetService<AgentBalanceQuery, AgentBalanceResult> agentBalanceService)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
         _fundStatusService = fundStatusService ?? throw new ArgumentNullException(nameof(fundStatusService));
-        _gameRecordService = gameRecordService ?? throw new ArgumentNullException(nameof(gameRecordService));
+        _gameWagerService = gameWagerService ?? throw new ArgumentNullException(nameof(gameWagerService));
         _gameUrlService = gameUrlService ?? throw new ArgumentNullException(nameof(gameUrlService));
         _playerBalanceService = playerBalanceService ?? throw new ArgumentNullException(nameof(playerBalanceService));
         _playerLogoutService = PlayerLogoutService ?? throw new ArgumentNullException(nameof(PlayerLogoutService));
+        _agentBalanceService = agentBalanceService ?? throw new ArgumentNullException(nameof(agentBalanceService));
+    }
+
+    public override async Task<AgentBalanceReply> AgentBalance(AgentBalanceRequest request, ServerCallContext context)
+    {
+        var query = new AgentBalanceQuery(
+            ApiUrl: new(request.ApiUrl),
+            Deskey: request.Deskey,
+            MD5key: request.MD5Key,
+            AgentId: request.AgentId);
+
+        var result = await _agentBalanceService
+            .GetAsync(
+            query: query,
+            cancellationToken: context.CancellationToken)
+            .ConfigureAwait(false);
+
+        return new AgentBalanceReply
+        {
+            Credit = result.Credit
+        };
     }
 
     public override Task<CheckingServiceReply> CheckingService(CheckingServiceRequest request, ServerCallContext context)
@@ -55,9 +78,10 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
             MD5key: request.MD5Key,
             AgentId: request.AgentId,
             PlayerCode: request.PlayerCode,
+            OrderId: request.OrderId,
             Amount: request.Amount);
 
-        var orderId = await _fundInService
+        var result = await _fundInService
             .GetAsync(
             query: query,
             cancellationToken: context.CancellationToken)
@@ -65,7 +89,7 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
 
         return new FundReply
         {
-            OrderId = orderId
+            Resp = result.Resp,
         };
     }
 
@@ -77,9 +101,10 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
             MD5key: request.MD5Key,
             AgentId: request.AgentId,
             PlayerCode: request.PlayerCode,
+            OrderId: request.OrderId,
             Amount: request.Amount);
 
-        var orderId = await _fundOutService
+        var result = await _fundOutService
             .GetAsync(
             query: query,
             cancellationToken: context.CancellationToken)
@@ -87,7 +112,7 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
 
         return new FundReply
         {
-            OrderId = orderId
+            Resp = result.Resp,
         };
     }
 
@@ -112,9 +137,9 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
         };
     }
 
-    public override async Task<GameRecordReply> GameRecord(GameRecordRequest request, ServerCallContext context)
+    public override async Task<GameWagerReply> GameWager(GameWagerRequest request, ServerCallContext context)
     {
-        var query = new GameRecordQuery(
+        var query = new GameWagerQuery(
             ApiUrl: new(request.ApiUrl),
             Deskey: request.Deskey,
             MD5key: request.MD5Key,
@@ -122,24 +147,24 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
             StartTime: request.StartTime.ToDateTimeOffset(),
             EndTime: request.EndTime.ToDateTimeOffset());
 
-        var results = await _gameRecordService
+        var results = await _gameWagerService
             .QueryAsync(
                 query: query,
                 cancellationToken: context.CancellationToken)
             .ToArrayAsync(
                 cancellationToken: context.CancellationToken)
             .ConfigureAwait(false)
-            ?? Enumerable.Empty<GameRecordResult>();
+            ?? Enumerable.Empty<GameWagerResult>();
 
-        var reply = new GameRecordReply();
+        var reply = new GameWagerReply();
 
         if (results.Any())
         {
             foreach (var result in results)
             {
-                reply.Items.Add(new GameRecordInfo
+                reply.Items.Add(new GameWagerInfo
                 {
-                    ExternalRoundId = result.ExternalRoundId,
+                    ExternalWagerId = result.ExternalWagerId,
                     ExternalGameId = result.ExternalGameId,
                     PlayerCode = result.PlayerCode,
                     ExternalCreatedOn = result.ExternalCreatedOn.ToTimestamp(),
@@ -148,7 +173,6 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
                     ValidBet = result.ValidBet,
                     Settle = result.Settle,
                     Commission = result.Commission,
-                    Turnover = result.Turnover,
                     WinLoss = result.WinLoss,
                     AdditionalData = result.AdditionalData
                 });
@@ -168,7 +192,7 @@ public class GameInterfaceLEGamingGrpcService : GameInterfaceLEGaming.GameInterf
             BrandCode: request.BrandCode,
             PlayerCode: request.PlayerCode,
             IpAddress: request.IpAddress,
-            GameExternalID: request.GameExternalId);
+            ExternalGameId: request.ExternalGameId);
 
         var result = await _gameUrlService
             .GetAsync(

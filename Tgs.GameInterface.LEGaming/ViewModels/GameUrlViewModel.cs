@@ -19,5 +19,5 @@ public record GameUrlViewModel
     [Required]
     public string IpAddress { get; init; } = default!;
     [Required]
-    public string GameExternalID { get; init; } = default!;
+    public string ExternalGameId { get; init; } = default!;
 }

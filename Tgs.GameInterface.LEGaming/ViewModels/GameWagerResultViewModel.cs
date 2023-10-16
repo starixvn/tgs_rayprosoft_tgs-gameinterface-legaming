@@ -1,7 +1,7 @@
 ﻿namespace Tgs.GameInterface.LEGaming.ViewModels;
 
-public record GameRecordResultViewModel(
-    string ExternalRoundId,
+public record GameWagerResultViewModel(
+    string ExternalWagerId,
     string ExternalGameId,
     string PlayerCode,
     DateTimeOffset ExternalCreatedOn,
@@ -10,6 +10,5 @@ public record GameRecordResultViewModel(
     decimal ValidBet,
     decimal Settle,
     decimal Commission,
-    decimal Turnover,
     decimal WinLoss,
     string AdditionalData);

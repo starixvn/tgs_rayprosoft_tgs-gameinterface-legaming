@@ -16,17 +16,13 @@ public class GameUrlGetServiceUnitTest
             BrandCode: "GPI_HKD",
             PlayerCode: "4uk9399rb9qo",
             IpAddress: "127.0.0.1",
-            GameExternalID: "1");
+            ExternalGameId: "1");
 
         var fakeClient = Substitute.For<IGameApiClient>();
 
-        var service = new GameUrlGetService(
-            fakeClient);
+        var service = new GameUrlGetService(fakeClient);
 
-        _ = await service
-            .GetAsync(
-            query: query)
-            .ConfigureAwait(false);
+        _ = await service.GetAsync(query: query);
 
         _ = fakeClient
             .Received(1)
@@ -38,7 +34,7 @@ public class GameUrlGetServiceUnitTest
             Arg.Is(query.PlayerCode),
             Arg.Is(query.IpAddress),
             Arg.Is(query.BrandCode),
-            Arg.Is(query.GameExternalID),
+            Arg.Is(query.ExternalGameId),
             Arg.Any<CancellationToken>());
     }
 }

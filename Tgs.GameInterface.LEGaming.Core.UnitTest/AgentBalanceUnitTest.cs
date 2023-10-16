@@ -9,7 +9,7 @@ using RichardSzalay.MockHttp;
 
 namespace Tgs.GameInterface.LEGaming.Core.UnitTest;
 
-public record WithdrawalUnitTest
+public class AgentBalanceUnitTest
 {
     [Fact]
     public async void Normal_Process()
@@ -18,17 +18,15 @@ public record WithdrawalUnitTest
         var deskey = "706EB65DD6E6DF4C";
         var md5key = "3E00054B89B31B7A";
         var agentId = "200995";
-        var account = "4uk9399rb9qo";
-        var money = 1.0m;
 
         var fakeCryptography = Substitute.For<IHashCryptography>();
         var fakeSystemClock = Substitute.For<ISystemClock>();
 
-        var currentTime = DateTimeOffset.Parse("2023-07-18T02:47:37.773+00:00");
+        var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1690340035435);
         _ = fakeSystemClock.CurrentTime.Returns(currentTime);
 
-        var data = "s=3&account=4uk9399rb9qo&money=1.0&orderid=200995202307180247377734uk9399rb9qo";
-        var param = "GH0Qljygg7xF2c6Y96voiTdvMatt5jkN9bInYdABoiOAeTiwMbg4NxDsLp7/LhHdGMUcaYastbwoiSHEyUZqG1ReJCs3i59vo4LBa23bhl0=";
+        var data = "s=14";
+        var param = "TVvTX3VbPPF8uoTUB9GG382q5wLB1kCJjq8gYecYEyc=";
         _ = fakeCryptography.GetAesEncryptAsync(
             data: Arg.Is(data),
             secretKey: Arg.Is(deskey),
@@ -36,7 +34,7 @@ public record WithdrawalUnitTest
             .Returns(param);
 
         var dataMD5 = $"{agentId}{currentTime.ToUnixTimeMilliseconds()}{md5key}";
-        var key = "c4bffb92e6a490445c82f6c43a84e0bc";
+        var key = "2a9a46e4cb2ef009ce1ca3732227ec4f";
         _ = fakeCryptography.GetHash(
             data: Arg.Is(dataMD5))
             .Returns(key);
@@ -52,11 +50,11 @@ public record WithdrawalUnitTest
         var response = new JsonObject
         {
             ["m"] = "/channelHandle",
-            ["s"] = 103,
+            ["s"] = 114,
             ["d"] = new JsonObject
             {
                 ["code"] = 0,
-                ["money"] = "0.00"
+                ["money"] = "10000000.00"
             }
         };
 
@@ -75,16 +73,12 @@ public record WithdrawalUnitTest
             fakeHttpClient);
 
         var actual = await client
-            .WithdrawalAsync(
+            .AgentBalanceAsync(
             apiUrl: apiUrl,
             deskey: deskey,
             md5key: md5key,
-            agentId: agentId,
-            account: account,
-            money: money)
-            .ConfigureAwait(false);
+            agentId: agentId);
 
-        Assert.NotNull(actual);
-        Assert.Equal("200995202307180247377734uk9399rb9qo", actual);
+        Assert.Equal(10000000.00m, actual);
     }
 }

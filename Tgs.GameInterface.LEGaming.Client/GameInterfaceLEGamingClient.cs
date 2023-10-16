@@ -13,9 +13,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async ValueTask<string> CheckingServiceAsync(
-        string machineName,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<string> CheckingServiceAsync(string machineName, CancellationToken cancellationToken = default)
     {
         var request = new CheckingServiceRequest
         {
@@ -31,14 +29,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
         return reply.MachineName;
     }
 
-    public async ValueTask<string> FundInAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string playerCode,
-        decimal amount,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<FundReply> FundInAsync(Uri apiUrl, string deskey, string md5key, string agentId, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
     {
         var request = new FundRequest
         {
@@ -47,26 +38,17 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             MD5Key = md5key,
             AgentId = agentId,
             PlayerCode = playerCode,
+            OrderId = orderId,
             Amount = amount
         };
 
-        var reply = await _client
-       .FundInAsync(
-           request: request,
-           cancellationToken: cancellationToken)
-       .ConfigureAwait(false);
-
-        return reply.OrderId;
+        return await _client.FundInAsync(
+            request: request,
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
-    public async ValueTask<string> FundOutAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string playerCode,
-        decimal amount,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<FundReply> FundOutAsync(Uri apiUrl, string deskey, string md5key, string agentId, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
     {
         var request = new FundRequest
         {
@@ -75,25 +57,17 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             MD5Key = md5key,
             AgentId = agentId,
             PlayerCode = playerCode,
+            OrderId = orderId,
             Amount = amount
         };
 
-        var reply = await _client
-       .FundOutAsync(
-           request: request,
-           cancellationToken: cancellationToken)
-       .ConfigureAwait(false);
-
-        return reply.OrderId;
+        return await _client.FundOutAsync(
+            request: request,
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
-    public async ValueTask<bool> FundStatusAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string orderId,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<bool> FundStatusAsync(Uri apiUrl, string deskey, string md5key, string agentId, string orderId, CancellationToken cancellationToken = default)
     {
         var request = new FundStatusRequest
         {
@@ -113,16 +87,9 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
         return reply.State;
     }
 
-    public async IAsyncEnumerable<GameRecordInfo> GameRecordAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        DateTimeOffset startTime,
-        DateTimeOffset endTime,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<GameWagerInfo> GameWagerAsync(Uri apiUrl, string deskey, string md5key, string agentId, DateTimeOffset startTime, DateTimeOffset endTime, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var request = new GameRecordRequest
+        var request = new GameWagerRequest
         {
             ApiUrl = apiUrl.ToString(),
             Deskey = deskey,
@@ -132,36 +99,26 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             EndTime = endTime.ToTimestamp()
         };
 
-        var reply = await _client
-       .GameRecordAsync(
-           request: request,
-           cancellationToken: cancellationToken)
-       .ConfigureAwait(false);
+        var reply = await _client.GameWagerAsync(
+            request: request,
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
-        var gameRecords = reply.Items
-            ?? Enumerable.Empty<GameRecordInfo>();
+        var infos = reply.Items
+            ?? Enumerable.Empty<GameWagerInfo>();
 
-        if (!gameRecords.Any())
+        if (!infos.Any())
         {
             yield break;
         }
 
-        foreach (var gameRecord in gameRecords)
+        foreach (var info in infos)
         {
-            yield return gameRecord;
+            yield return info;
         }
     }
 
-    public async ValueTask<string> GameUrlAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string brandCode,
-        string playerCode,
-        string ipAddress,
-        string gameExternalID,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<string> GameUrlAsync(Uri apiUrl, string deskey, string md5key, string agentId, string brandCode, string playerCode, string ipAddress, string externalGameId, CancellationToken cancellationToken = default)
     {
         var request = new GameUrlRequest
         {
@@ -172,7 +129,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             BrandCode = brandCode,
             PlayerCode = playerCode,
             IpAddress = ipAddress,
-            GameExternalId = gameExternalID
+            ExternalGameId = externalGameId
         };
 
         var reply = await _client
@@ -184,13 +141,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
         return reply.GameUrl.ToString();
     }
 
-    public async ValueTask<PlayerBalanceReply> PlayerBalanceAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string playerCode,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerBalanceReply> PlayerBalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, string playerCode, CancellationToken cancellationToken = default)
     {
         var request = new PlayerBalanceRequest
         {
@@ -208,13 +159,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
        .ConfigureAwait(false);
     }
 
-    public async ValueTask PlayerLogoutAsync(
-        Uri apiUrl,
-        string deskey,
-        string md5key,
-        string agentId,
-        string playerCode,
-        CancellationToken cancellationToken = default)
+    public async ValueTask PlayerLogoutAsync(Uri apiUrl, string deskey, string md5key, string agentId, string playerCode, CancellationToken cancellationToken = default)
     {
         var request = new PlayerLogoutRequest
         {
@@ -230,5 +175,21 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             request: request,
             cancellationToken: cancellationToken)
         .ConfigureAwait(false);
+    }
+
+    public async ValueTask<AgentBalanceReply> AgentBalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, CancellationToken cancellationToken = default)
+    {
+        var request = new AgentBalanceRequest
+        {
+            ApiUrl = apiUrl.ToString(),
+            Deskey = deskey,
+            MD5Key = md5key,
+            AgentId = agentId
+        };
+
+        return await _client.AgentBalanceAsync(
+            request: request,
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 }

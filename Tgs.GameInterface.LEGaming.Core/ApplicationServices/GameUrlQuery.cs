@@ -8,4 +8,4 @@ public record GameUrlQuery(
     string BrandCode,
     string PlayerCode,
     string IpAddress,
-    string GameExternalID);
+    string ExternalGameId);

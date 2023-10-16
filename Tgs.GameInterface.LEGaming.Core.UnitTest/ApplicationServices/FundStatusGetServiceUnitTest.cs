@@ -17,13 +17,9 @@ public class FundStatusGetServiceUnitTest
 
         var fakeClient = Substitute.For<IGameApiClient>();
 
-        var service = new FundStatusGetService(
-            fakeClient);
+        var service = new FundStatusGetService(fakeClient);
 
-        _ = await service
-            .GetAsync(
-            query: query)
-            .ConfigureAwait(false);
+        _ = await service.GetAsync(query: query);
 
         _ = fakeClient
             .Received(1)

@@ -2,7 +2,7 @@
 
 namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
 
-internal class FundInGetService : IGetService<FundInQuery, string>
+internal class FundInGetService : IGetService<FundInQuery, FundResult>
 {
     private readonly IGameApiClient _client;
 
@@ -11,14 +11,19 @@ internal class FundInGetService : IGetService<FundInQuery, string>
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public ValueTask<string> GetAsync(FundInQuery query, CancellationToken cancellationToken = default)
-        => _client
-        .WithdrawalAsync(
+    public async ValueTask<FundResult> GetAsync(FundInQuery query, CancellationToken cancellationToken = default)
+    {
+        var resp = await _client.WithdrawAsync(
             apiUrl: query.ApiUrl,
             deskey: query.Deskey,
             md5key: query.MD5key,
             agentId: query.AgentId,
             account: query.PlayerCode,
+            orderId: query.OrderId,
             money: query.Amount,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return new FundResult(resp.Resp);
+    }
 }

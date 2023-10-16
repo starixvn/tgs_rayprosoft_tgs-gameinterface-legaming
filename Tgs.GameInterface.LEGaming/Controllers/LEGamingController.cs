@@ -26,6 +26,7 @@ public class LEGamingController : ControllerBase
     ///             "mD5key": "3E00054B89B31B7A",
     ///             "agentId": "200995",
     ///             "playerCode":"4uk9399rb9qo",
+    ///             "orderId":"200995202307180247377734uk9399rb9qo",
     ///             "amount": 1
     ///         }
     /// </remarks>
@@ -40,6 +41,7 @@ public class LEGamingController : ControllerBase
             MD5key: source.MD5key,
             AgentId: source.AgentId,
             PlayerCode: source.PlayerCode,
+            OrderId: source.OrderId,
             Amount: source.Amount);
 
         return service
@@ -65,6 +67,7 @@ public class LEGamingController : ControllerBase
     ///             "mD5key": "3E00054B89B31B7A",
     ///             "agentId": "200995",
     ///             "playerCode":"4uk9399rb9qo",
+    ///             "orderId":"200995202307180240242304uk9399rb9qo",
     ///             "amount": 1
     ///         }
     /// </remarks>
@@ -79,6 +82,7 @@ public class LEGamingController : ControllerBase
             MD5key: source.MD5key,
             AgentId: source.AgentId,
             PlayerCode: source.PlayerCode,
+            OrderId: source.OrderId,
             Amount: source.Amount);
 
         return service
@@ -124,7 +128,7 @@ public class LEGamingController : ControllerBase
     }
 
     /// <summary>
-    /// Games the record asynchronous.
+    /// Games the wager asynchronous.
     /// </summary>
     /// <param name="service">The service.</param>
     /// <param name="source">The source.</param>
@@ -143,12 +147,12 @@ public class LEGamingController : ControllerBase
     ///             "endTime": "2023-07-18T12:09:00+08:00"
     ///         }
     /// </remarks>
-    [HttpPost("game/record")]
-    public async IAsyncEnumerable<GameRecordResultViewModel> GameRecordAsync(
-        [FromServices] IQueryService<GameRecordQuery, GameRecordResult> service,
-        GameRecordViewModel source)
+    [HttpPost("game/wager")]
+    public async IAsyncEnumerable<GameWagerResultViewModel> GameWagerAsync(
+        [FromServices] IQueryService<GameWagerQuery, GameWagerResult> service,
+        GameWagerViewModel source)
     {
-        var query = new GameRecordQuery(
+        var query = new GameWagerQuery(
             ApiUrl: source.ApiUrl,
             Deskey: source.Deskey,
             MD5key: source.MD5key,
@@ -163,7 +167,7 @@ public class LEGamingController : ControllerBase
             .ToArrayAsync(
                 cancellationToken: HttpContext.RequestAborted)
             .ConfigureAwait(false)
-            ?? Enumerable.Empty<GameRecordResult>();
+            ?? Enumerable.Empty<GameWagerResult>();
 
         if (!results.Any())
         {
@@ -172,8 +176,8 @@ public class LEGamingController : ControllerBase
 
         foreach (var result in results)
         {
-            yield return new GameRecordResultViewModel(
-                ExternalRoundId: result.ExternalRoundId,
+            yield return new GameWagerResultViewModel(
+                ExternalWagerId: result.ExternalWagerId,
                 ExternalGameId: result.ExternalGameId,
                 PlayerCode: result.PlayerCode,
                 ExternalCreatedOn: result.ExternalCreatedOn,
@@ -182,7 +186,6 @@ public class LEGamingController : ControllerBase
                 ValidBet: result.ValidBet,
                 Settle: result.Settle,
                 Commission: result.Commission,
-                Turnover: result.Turnover,
                 WinLoss: result.WinLoss,
                 AdditionalData: result.AdditionalData);
         }
@@ -223,7 +226,7 @@ public class LEGamingController : ControllerBase
             BrandCode: source.BrandCode,
             PlayerCode: source.PlayerCode,
             IpAddress: source.IpAddress,
-            GameExternalID: source.GameExternalID);
+            ExternalGameId: source.ExternalGameId);
 
         return service
             .GetAsync(
@@ -309,5 +312,44 @@ public class LEGamingController : ControllerBase
             .ExecuteAsync(
             command: command,
             cancellationToken: HttpContext.RequestAborted);
+    }
+
+    /// <summary>
+    /// Agents the balance asynchronous.
+    /// </summary>
+    /// <param name="service">The service.</param>
+    /// <param name="source">The source.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://wc1-api.kewmn686.com/",
+    ///             "deskey": "706EB65DD6E6DF4C",
+    ///             "mD5key": "3E00054B89B31B7A",
+    ///             "agentId": "200995"
+    ///         }
+    /// </remarks>
+    [HttpPost("agent/balance", Name = "AgentBalance")]
+    public async ValueTask<AgentBalanceResultViewModel> AgentBalanceAsync(
+        [FromServices] IGetService<AgentBalanceQuery, AgentBalanceResult> service,
+        AgentBalanceViewModel source)
+    {
+        var query = new AgentBalanceQuery(
+            ApiUrl: source.ApiUrl,
+            Deskey: source.Deskey,
+            MD5key: source.MD5key,
+            AgentId: source.AgentId);
+
+        var result = await service
+            .GetAsync(
+            query: query,
+            cancellationToken: HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new AgentBalanceResultViewModel(
+            Credit: result.Credit);
     }
 }

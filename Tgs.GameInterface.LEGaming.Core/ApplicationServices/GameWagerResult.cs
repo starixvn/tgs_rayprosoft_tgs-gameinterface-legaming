@@ -1,7 +1,7 @@
 ﻿namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
 
-public record GameRecordResult(
-    string ExternalRoundId,
+public record GameWagerResult(
+    string ExternalWagerId,
     string ExternalGameId,
     string PlayerCode,
     DateTimeOffset ExternalCreatedOn,
@@ -10,6 +10,5 @@ public record GameRecordResult(
     decimal ValidBet,
     decimal Settle,
     decimal Commission,
-    decimal Turnover,
     decimal WinLoss,
     string AdditionalData);

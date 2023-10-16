@@ -15,5 +15,7 @@ public record FundViewModel
     [Required]
     public string PlayerCode { get; init; } = default!;
     [Required]
+    public string OrderId { get; init; } = default!;
+    [Required]
     public decimal Amount { get; init; }
 }

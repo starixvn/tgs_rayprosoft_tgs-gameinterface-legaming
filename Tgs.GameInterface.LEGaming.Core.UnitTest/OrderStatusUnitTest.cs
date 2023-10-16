@@ -80,8 +80,7 @@ public class OrderStatusUnitTest
             deskey: deskey,
             md5key: md5key,
             agentId: agentId,
-            orderId: orderId)
-            .ConfigureAwait(false);
+            orderId: orderId);
 
         Assert.True(actual);
     }
@@ -155,8 +154,7 @@ public class OrderStatusUnitTest
             deskey: deskey,
             md5key: md5key,
             agentId: agentId,
-            orderId: orderId)
-            .ConfigureAwait(false);
+            orderId: orderId);
 
         Assert.False(actual);
     }
