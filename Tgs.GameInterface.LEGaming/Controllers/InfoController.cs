@@ -3,6 +3,8 @@ using System.Net.Sockets;
 using System.Reflection;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Tgs.GameInterface.LEGaming.Core;
 
 namespace Tgs.GameInterface.LEGaming.Controllers;
 
@@ -10,6 +12,14 @@ namespace Tgs.GameInterface.LEGaming.Controllers;
 [ApiController]
 public class InfoController : ControllerBase
 {
+    private readonly PolicySettingsOptions _policySettingsOptions;
+
+    public InfoController(
+        IOptions<PolicySettingsOptions> options)
+    {
+        _policySettingsOptions = options.Value;
+    }
+
     [HttpGet]
     public async Task<object> GetAsync([FromServices] IWebHostEnvironment _hostingEnvironment)
     {
@@ -26,7 +36,8 @@ public class InfoController : ControllerBase
             Environment = _hostingEnvironment.EnvironmentName,
             OsVersion = $"{Environment.OSVersion}",
             Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
-            ProcessCount = Environment.ProcessorCount
+            ProcessCount = Environment.ProcessorCount,
+            PolicySettingsOptions = _policySettingsOptions
         };
     }
 }

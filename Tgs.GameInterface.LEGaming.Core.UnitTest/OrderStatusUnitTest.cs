@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Web;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using RichardSzalay.MockHttp;
 
@@ -14,6 +15,14 @@ public class OrderStatusUnitTest
     [Fact]
     public async void Normal_Process()
     {
+        var policySettingsOptions = Options.Create(new PolicySettingsOptions
+        {
+            DepositRetryCount = 1,
+            DepositRetryWaitSec = 1,
+            GameRecordRetryCount = 1,
+            GameRecordRetryWaitSec = 1
+        });
+
         Uri apiUrl = new Uri("https://wc1-api.kewmn686.com/");
         var deskey = "706EB65DD6E6DF4C";
         var md5key = "3E00054B89B31B7A";
@@ -70,6 +79,7 @@ public class OrderStatusUnitTest
 
         var client = new GameApiClient(
             fakeLog,
+            policySettingsOptions,
             fakeCryptography,
             fakeSystemClock,
             fakeHttpClient);
@@ -88,6 +98,14 @@ public class OrderStatusUnitTest
     [Fact]
     public async void Order_Does_Not_Exist()
     {
+        var policySettingsOptions = Options.Create(new PolicySettingsOptions
+        {
+            DepositRetryCount = 1,
+            DepositRetryWaitSec = 1,
+            GameRecordRetryCount = 1,
+            GameRecordRetryWaitSec = 1
+        });
+
         Uri apiUrl = new Uri("https://wc1-api.kewmn686.com/");
         var deskey = "706EB65DD6E6DF4C";
         var md5key = "3E00054B89B31B7A";
@@ -144,12 +162,12 @@ public class OrderStatusUnitTest
 
         var client = new GameApiClient(
             fakeLog,
+            policySettingsOptions,
             fakeCryptography,
             fakeSystemClock,
             fakeHttpClient);
 
-        var actual = await client
-            .OrderStatusAsync(
+        var actual = await client.OrderStatusAsync(
             apiUrl: apiUrl,
             deskey: deskey,
             md5key: md5key,
