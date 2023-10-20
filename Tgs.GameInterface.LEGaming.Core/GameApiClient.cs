@@ -87,7 +87,7 @@ internal class GameApiClient : IGameApiClient
             retryAttempt => TimeSpan.FromSeconds(_policySettingsOptions.DepositRetryWaitSec),
             onRetry: (response, retryTime, context) =>
             {
-                _logger.LogWarning("LogOn:{logOn} | Message:禁止同一账号登录带分、上分、下分并发请求，后一个请求被拒 | Json:{jsonNode}", DateTime.Now.ToString("o"), response.Result.ToJsonString());
+                _logger.LogWarning("LogOn:{logOn} | Message:禁止同一帳號登入帶分、上分、下分並發請求，後一個請求被拒 | Json:{jsonNode}", DateTime.Now.ToString("o"), response.Result.ToJsonString());
             });
 
         var jsonNode = await retryPolicy
