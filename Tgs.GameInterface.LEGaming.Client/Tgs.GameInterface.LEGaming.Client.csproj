@@ -4,14 +4,18 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>0.0.7</Version>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Version>0.0.8</Version>
 		<Authors>Raypro</Authors>
-		<RootNamespace>Tgs.GameInterface.LEGaming.Client</RootNamespace>
-		<PackageId>Tgs.GameInterface.LEGaming.Client</PackageId>
-		<Title>Tgs.GameInterface.LEGaming.Client</Title>
 		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-legaming</PackageProjectUrl>
 		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-legaming.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<RootNamespace>Tgs.GameInterface.LEGaming.Client</RootNamespace>
+		<PackageId>Tgs.GameInterface.LEGaming.Client</PackageId>
+		<Title>Tgs.GameInterface.LEGaming.Client</Title>
+		<Description>Tgs.GameInterface.LEGaming.Client</Description>
 		<PackageTags>Tgs GameInterface LEGaming Client</PackageTags>
 	</PropertyGroup>
 
@@ -26,9 +30,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Protobuf Include="..\Tgs.GameInterface.LEGaming\Protos\gameinterfacelegaming.proto">
-	    <Link>gameinterfacelegaming.proto</Link>
-	  </Protobuf>
+		<Protobuf Include="..\Tgs.GameInterface.LEGaming\Protos\gameinterfacelegaming.proto">
+			<Link>gameinterfacelegaming.proto</Link>
+		</Protobuf>
 	</ItemGroup>
 
 </Project>
