@@ -2,20 +2,13 @@
 
 namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
 
-public class GameUrlGetService : IGetService<GameUrlQuery, string>
+public class GameUrlGetService(
+    IGameApiClient client) : IGetService<GameUrlQuery, string>
 {
-    private readonly IGameApiClient _client;
-
-    public GameUrlGetService(IGameApiClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public ValueTask<string> GetAsync(
         GameUrlQuery query,
         CancellationToken cancellationToken = default)
-        => _client
-        .LoginAsync(
+        => client.LoginAsync(
             apiUrl: query.ApiUrl,
             deskey: query.Deskey,
             md5key: query.MD5key,

@@ -11,27 +11,14 @@ using Tgs.GameInterface.LEGaming.Core.Models;
 
 namespace Tgs.GameInterface.LEGaming.Core;
 
-internal class GameApiClient : IGameApiClient
+internal class GameApiClient(
+    ILogger<GameApiClient> logger,
+    IOptions<PolicySettingsOptions> options,
+    IHashCryptography cryptography,
+    ISystemClock systemClock,
+    HttpClient client) : IGameApiClient
 {
-    private readonly ILogger<GameApiClient> _logger;
-    private readonly PolicySettingsOptions _policySettingsOptions;
-    private readonly IHashCryptography _cryptography;
-    private readonly ISystemClock _systemClock;
-    private readonly HttpClient _client;
-
-    public GameApiClient(
-        ILogger<GameApiClient> logger,
-        IOptions<PolicySettingsOptions> options,
-        IHashCryptography cryptography,
-        ISystemClock systemClock,
-        HttpClient client)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _policySettingsOptions = options.Value;
-        _cryptography = cryptography ?? throw new ArgumentNullException(nameof(cryptography));
-        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
+    private readonly PolicySettingsOptions _policySettingsOptions = options.Value;
 
     public async ValueTask<decimal> AgentBalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, CancellationToken cancellationToken = default)
     {
@@ -87,7 +74,7 @@ internal class GameApiClient : IGameApiClient
             retryAttempt => TimeSpan.FromSeconds(_policySettingsOptions.DepositRetryWaitSec),
             onRetry: (response, retryTime, context) =>
             {
-                _logger.LogWarning("LogOn:{logOn} | Message:禁止同一帳號登入帶分、上分、下分並發請求，後一個請求被拒 | Json:{jsonNode}", DateTime.Now.ToString("o"), response.Result.ToJsonString());
+                logger.LogWarning("LogOn:{logOn} | Message:禁止同一帳號登入帶分、上分、下分並發請求，後一個請求被拒 | Json:{jsonNode}", DateTime.Now.ToString("o"), response.Result.ToJsonString());
             });
 
         var jsonNode = await retryPolicy
@@ -114,7 +101,7 @@ internal class GameApiClient : IGameApiClient
 
     {
         var subTypes = SubTypes.Login;
-        var orderId = $"{agentId}{_systemClock.CurrentTime:yyyyMMddHHmmssfff}{account}";
+        var orderId = $"{agentId}{systemClock.CurrentTime:yyyyMMddHHmmssfff}{account}";
         var data = $"s={(int)subTypes}&account={account}&money=0&orderid={orderId}&ip={ipAddress}&lineCode={lineCode}&KindID={kindID}";
         var jsonNode = await GetAsync(
             apiUrl: apiUrl,
@@ -200,25 +187,25 @@ internal class GameApiClient : IGameApiClient
 
     private async ValueTask<JsonNode> GetAsync(Uri apiUrl, SubTypes types, string deskey, string md5key, string agentId, string data, CancellationToken cancellationToken = default)
     {
-        var timestamp = _systemClock.CurrentTime.ToUnixTimeMilliseconds();
+        var timestamp = systemClock.CurrentTime.ToUnixTimeMilliseconds();
         var uriBuilder = new UriBuilder(new Uri(apiUrl, "/channelHandle"));
         var query = HttpUtility.ParseQueryString(uriBuilder.Query);
         query["agent"] = agentId;
         query["timestamp"] = timestamp.ToString();
-        query["param"] = await _cryptography
+        query["param"] = await cryptography
             .GetAesEncryptAsync(
             data: data,
             secretKey: deskey,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-        query["key"] = _cryptography.GetHash($"{agentId}{timestamp}{md5key}");
+        query["key"] = cryptography.GetHash($"{agentId}{timestamp}{md5key}");
         uriBuilder.Query = query.ToString();
 
         var logPrefix = $"{nameof(GameApiClient)}.{types}";
 
         var sw = Stopwatch.StartNew();
 
-        var httpResponseMessage = await _client
+        var httpResponseMessage = await client
             .GetAsync(
                 requestUri: uriBuilder.ToString(),
                 cancellationToken: cancellationToken)
@@ -250,7 +237,7 @@ internal class GameApiClient : IGameApiClient
             RecordedOn = DateTimeOffset.UtcNow
         };
 
-        _logger.LogInformation("{logEvent}", JsonSerializer.Serialize(logEvent));
+        logger.LogInformation("{logEvent}", JsonSerializer.Serialize(logEvent));
 
         _ = httpResponseMessage.EnsureSuccessStatusCode();
 

@@ -4,15 +4,9 @@ using Tgs.GameInterface.LEGaming.Protos;
 
 namespace Tgs.GameInterface.LEGaming.Client;
 
-internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
+internal class GameInterfaceLEGamingClient(
+    GameInterfaceLEGaming.GameInterfaceLEGamingClient client) : IGameInterfaceLEGamingClient
 {
-    private readonly GameInterfaceLEGaming.GameInterfaceLEGamingClient _client;
-
-    public GameInterfaceLEGamingClient(GameInterfaceLEGaming.GameInterfaceLEGamingClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public async ValueTask<string> CheckingServiceAsync(string machineName, CancellationToken cancellationToken = default)
     {
         var request = new CheckingServiceRequest
@@ -20,7 +14,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             MachineName = machineName,
         };
 
-        var reply = await _client
+        var reply = await client
             .CheckingServiceAsync(
                 request: request,
                 cancellationToken: cancellationToken)
@@ -42,7 +36,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             Amount = amount
         };
 
-        return await _client.FundInAsync(
+        return await client.FundInAsync(
             request: request,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -61,7 +55,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             Amount = amount
         };
 
-        return await _client.FundOutAsync(
+        return await client.FundOutAsync(
             request: request,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -78,7 +72,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             OrderId = orderId,
         };
 
-        var reply = await _client
+        var reply = await client
        .FundStatusAsync(
            request: request,
            cancellationToken: cancellationToken)
@@ -99,7 +93,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             EndTime = endTime.ToTimestamp()
         };
 
-        var reply = await _client.GameWagerAsync(
+        var reply = await client.GameWagerAsync(
             request: request,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -132,7 +126,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             ExternalGameId = externalGameId
         };
 
-        var reply = await _client
+        var reply = await client
        .GameUrlAsync(
            request: request,
            cancellationToken: cancellationToken)
@@ -152,7 +146,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             PlayerCode = playerCode
         };
 
-        return await _client
+        return await client
        .PlayerBalanceAsync(
            request: request,
            cancellationToken: cancellationToken)
@@ -170,7 +164,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             PlayerCode = playerCode
         };
 
-        _ = await _client
+        _ = await client
         .PlayerLogoutAsync(
             request: request,
             cancellationToken: cancellationToken)
@@ -187,7 +181,7 @@ internal class GameInterfaceLEGamingClient : IGameInterfaceLEGamingClient
             AgentId = agentId
         };
 
-        return await _client.AgentBalanceAsync(
+        return await client.AgentBalanceAsync(
             request: request,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
