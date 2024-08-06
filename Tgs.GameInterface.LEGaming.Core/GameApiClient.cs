@@ -57,10 +57,16 @@ internal class GameApiClient(
 
 		var dataResponse = jsonNode["d"]!;
 		return dataResponse["code"]!.GetValue<int>() != 0
-			? throw new ReturnCodeException(dataResponse["code"]!.GetValue<int>())
+			? dataResponse["code"]!.GetValue<int>() != 16
+				? throw new ReturnCodeException(dataResponse["code"]!.GetValue<int>())
+				: new BalanceResp(
+				IsPlayerExist: false,
+				TotalMoney: 0.0m,
+				FreeMoney: 0.0m)
 			: new BalanceResp(
-			dataResponse["totalMoney"]!.GetValue<decimal>(),
-			dataResponse["freeMoney"]!.GetValue<decimal>());
+				IsPlayerExist: true,
+				TotalMoney: dataResponse["totalMoney"]!.GetValue<decimal>(),
+				FreeMoney: dataResponse["freeMoney"]!.GetValue<decimal>());
 	}
 
 	public async ValueTask<DepositResp> DepositAsync(Uri apiUrl, string deskey, string md5key, string agentId, string currency, string account, string orderId, decimal money, CancellationToken cancellationToken = default)

@@ -21,6 +21,7 @@ public class PlayerBalanceGetService(
 
 		return new PlayerBalanceResult
 		{
+			IsPlayerExist = resp.IsPlayerExist,
 			Balance = resp.TotalMoney,
 			FreeBalance = resp.FreeMoney
 		};
