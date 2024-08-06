@@ -12,6 +12,7 @@ internal class FundInGetService(
 			deskey: query.Deskey,
 			md5key: query.MD5key,
 			agentId: query.AgentId,
+			currency: query.AgentCurrency,
 			account: query.PlayerCode,
 			orderId: query.OrderId,
 			money: query.Amount,

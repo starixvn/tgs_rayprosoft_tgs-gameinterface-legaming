@@ -1,6 +1,6 @@
 ﻿namespace Tgs.GameInterface.LEGaming.Core.Models;
 
-public record GameRecordInfo(
+public record GameRecordResp(
 	string GameID,
 	string Account,
 	int ServerID,

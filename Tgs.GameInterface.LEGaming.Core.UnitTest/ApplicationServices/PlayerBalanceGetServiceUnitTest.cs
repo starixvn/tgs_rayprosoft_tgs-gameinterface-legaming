@@ -9,27 +9,30 @@ public class PlayerBalanceGetServiceUnitTest
 	[Fact]
 	public async Task Normal_ProcessAsync()
 	{
-		var query = new PlayerBalanceQuery(
-			ApiUrl: new Uri("https://wc1-api.kewmn686.com/"),
-			Deskey: "706EB65DD6E6DF4C",
-			MD5key: "3E00054B89B31B7A",
-			AgentId: "200995",
-			PlayerCode: "4uk9399rb9qo");
+		var query = new PlayerBalanceQuery
+		{
+			ApiUrl = new Uri("https://wc1-api.kewmn686.com/"),
+			Deskey = "706EB65DD6E6DF4C",
+			MD5key = "3E00054B89B31B7A",
+			AgentId = "200995",
+			AgentCurrency = "CNY",
+			PlayerCode = "4uk9399rb9qo"
+		};
 
 		var fakeClient = Substitute.For<IGameApiClient>();
 
-		var info = new BalanceInfo(
+		var resp = new BalanceResp(
 			TotalMoney: 100,
 			FreeMoney: 98);
-		_ = fakeClient
-			.BalanceAsync(
-			Arg.Is(query.ApiUrl),
-			Arg.Is(query.Deskey),
-			Arg.Is(query.MD5key),
-			Arg.Is(query.AgentId),
-			Arg.Is(query.PlayerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(info);
+		_ = fakeClient.BalanceAsync(
+			apiUrl: Arg.Is(query.ApiUrl),
+			deskey: Arg.Is(query.Deskey),
+			md5key: Arg.Is(query.MD5key),
+			agentId: Arg.Is(query.AgentId),
+			currency: Arg.Is(query.AgentCurrency),
+			account: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(resp);
 
 		var service = new PlayerBalanceGetService(fakeClient);
 

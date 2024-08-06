@@ -1,5 +1,5 @@
 ﻿namespace Tgs.GameInterface.LEGaming.Core.Models;
 
-public record BalanceInfo(
+public record BalanceResp(
 	decimal TotalMoney,
 	decimal FreeMoney);

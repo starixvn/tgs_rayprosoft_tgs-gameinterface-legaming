@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Tgs.GameInterface.LEGaming.Core;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -6,12 +7,8 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class ServiceCollecitonExtensions
 {
 	public static IServiceCollection AddGameInterfaceCore(
-		this IServiceCollection services,
-		Action<PolicySettingsOptions, IServiceProvider> policySettingsOptions)
+		this IServiceCollection services)
 		=> services
-		.AddOptions<PolicySettingsOptions>()
-		.Configure(policySettingsOptions)
-		.Services
 		.RegisterAllServiceUtilityTypes(
 			Assembly.GetExecutingAssembly(),
 			ServiceLifetime.Transient)
@@ -19,6 +16,6 @@ public static class ServiceCollecitonExtensions
 		.Services
 		.AddHttpClient<IGameRecordApiClient, GameRecordApiClient>()
 		.Services
-		.AddSingleton<IHashCryptography, HashCryptography>()
-		.AddSingleton<ISystemClock, SystemClock>();
+		.AddSingleton(TimeProvider.System)
+		.AddSingleton<IHashCryptography, HashCryptography>();
 }

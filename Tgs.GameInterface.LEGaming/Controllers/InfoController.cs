@@ -10,14 +10,13 @@ namespace Tgs.GameInterface.LEGaming.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class InfoController(
-	IConfiguration configuration,
-	IOptions<PolicySettingsOptions> options) : ControllerBase
+public class InfoController : ControllerBase
 {
-	private readonly PolicySettingsOptions _policySettingsOptions = options.Value;
-
 	[HttpGet]
-	public async Task<object> GetAsync([FromServices] IWebHostEnvironment _hostingEnvironment)
+	public async Task<object> GetAsync(
+		[FromServices] IConfiguration configuration,
+		[FromServices] IWebHostEnvironment webHostEnvironment,
+		[FromServices] IOptions<PolicySettingsOptions> options)
 	{
 		var hostName = Dns.GetHostName();
 		var hostEntry = await Dns.GetHostEntryAsync(hostName).ConfigureAwait(false);
@@ -29,13 +28,13 @@ public class InfoController(
 			Environment.MachineName,
 			HostName = hostName,
 			HostIp = hostIp?.ToString() ?? string.Empty,
-			Environment = _hostingEnvironment.EnvironmentName,
+			Environment = webHostEnvironment.EnvironmentName,
 			OsVersion = $"{Environment.OSVersion}",
 			Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
 			ProcessCount = Environment.ProcessorCount,
 			ReleaseNamespace = configuration.GetValue<string>("RELEASE_NAMESPACE"),
 			PodIPAddress = configuration.GetValue<string>("POD_IP"),
-			PolicySettingsOptions = _policySettingsOptions
+			PolicySettingsOptions = options.Value
 		};
 	}
 }

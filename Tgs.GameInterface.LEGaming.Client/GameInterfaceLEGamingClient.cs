@@ -23,7 +23,7 @@ internal class GameInterfaceLEGamingClient(
 		return reply.MachineName;
 	}
 
-	public async ValueTask<FundReply> FundInAsync(Uri apiUrl, string deskey, string md5key, string agentId, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
+	public async ValueTask<FundReply> FundInAsync(Uri apiUrl, string deskey, string md5key, string agentId, string agentCurrency, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
 	{
 		var request = new FundRequest
 		{
@@ -31,6 +31,7 @@ internal class GameInterfaceLEGamingClient(
 			Deskey = deskey,
 			MD5Key = md5key,
 			AgentId = agentId,
+			AgentCurrency = agentCurrency,
 			PlayerCode = playerCode,
 			OrderId = orderId,
 			Amount = amount
@@ -42,7 +43,7 @@ internal class GameInterfaceLEGamingClient(
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask<FundReply> FundOutAsync(Uri apiUrl, string deskey, string md5key, string agentId, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
+	public async ValueTask<FundReply> FundOutAsync(Uri apiUrl, string deskey, string md5key, string agentId, string agentCurrency, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
 	{
 		var request = new FundRequest
 		{
@@ -50,6 +51,7 @@ internal class GameInterfaceLEGamingClient(
 			Deskey = deskey,
 			MD5Key = md5key,
 			AgentId = agentId,
+			AgentCurrency = agentCurrency,
 			PlayerCode = playerCode,
 			OrderId = orderId,
 			Amount = amount
@@ -81,9 +83,9 @@ internal class GameInterfaceLEGamingClient(
 		return reply.State;
 	}
 
-	public async IAsyncEnumerable<GameWagerInfo> GameWagerAsync(Uri apiUrl, string deskey, string md5key, string agentId, DateTimeOffset startTime, DateTimeOffset endTime, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<GameRecordInfo> GameRecordAsync(Uri apiUrl, string deskey, string md5key, string agentId, DateTimeOffset startTime, DateTimeOffset endTime, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var request = new GameWagerRequest
+		var request = new GameRecordRequest
 		{
 			ApiUrl = apiUrl.ToString(),
 			Deskey = deskey,
@@ -93,26 +95,18 @@ internal class GameInterfaceLEGamingClient(
 			EndTime = endTime.ToTimestamp()
 		};
 
-		var reply = await client.GameWagerAsync(
+		var reply = await client.GameRecordAsync(
 			request: request,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		var infos = reply.Items
-			?? Enumerable.Empty<GameWagerInfo>();
-
-		if (!infos.Any())
-		{
-			yield break;
-		}
-
-		foreach (var info in infos)
+		foreach (var info in reply.Items)
 		{
 			yield return info;
 		}
 	}
 
-	public async ValueTask<string> GameUrlAsync(Uri apiUrl, string deskey, string md5key, string agentId, string brandCode, string playerCode, string ipAddress, string externalGameId, CancellationToken cancellationToken = default)
+	public async ValueTask<string> GameUrlAsync(Uri apiUrl, string deskey, string md5key, string agentId, string agentCurrency, string brandCode, string playerCode, string ipAddress, string externalGameId, CancellationToken cancellationToken = default)
 	{
 		var request = new GameUrlRequest
 		{
@@ -120,6 +114,7 @@ internal class GameInterfaceLEGamingClient(
 			Deskey = deskey,
 			MD5Key = md5key,
 			AgentId = agentId,
+			AgentCurrency = agentCurrency,
 			BrandCode = brandCode,
 			PlayerCode = playerCode,
 			IpAddress = ipAddress,
@@ -135,7 +130,7 @@ internal class GameInterfaceLEGamingClient(
 		return reply.GameUrl.ToString();
 	}
 
-	public async ValueTask<PlayerBalanceReply> PlayerBalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, string playerCode, CancellationToken cancellationToken = default)
+	public async ValueTask<PlayerBalanceReply> PlayerBalanceAsync(Uri apiUrl, string deskey, string md5key, string agentId, string agentCurrency, string playerCode, CancellationToken cancellationToken = default)
 	{
 		var request = new PlayerBalanceRequest
 		{
@@ -143,6 +138,7 @@ internal class GameInterfaceLEGamingClient(
 			Deskey = deskey,
 			MD5Key = md5key,
 			AgentId = agentId,
+			AgentCurrency = agentCurrency,
 			PlayerCode = playerCode
 		};
 

@@ -15,33 +15,31 @@ namespace Tgs.GameInterface.LEGaming.Core;
 internal class GameRecordApiClient(
 	ILogger<GameRecordApiClient> logger,
 	IOptions<PolicySettingsOptions> options,
+	TimeProvider timeProvider,
 	IHashCryptography cryptography,
-	ISystemClock systemClock,
 	HttpClient client) : IGameRecordApiClient
 {
 	private readonly PolicySettingsOptions _policySettingsOptions = options.Value;
 
-	public async IAsyncEnumerable<GameRecordInfo> GameRecordAsync(Uri apiUrl, string deskey, string md5key, string agentId, DateTimeOffset startTime, DateTimeOffset endTime, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<GameRecordResp> GameRecordAsync(Uri apiUrl, string deskey, string md5key, string agentId, DateTimeOffset startTime, DateTimeOffset endTime, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var retryPolicy = Policy
 			.HandleResult<JsonNode>(jsonNode => jsonNode["d"]!["code"]!.GetValue<int>() == 43)
 			.WaitAndRetryAsync(
-			retryCount: _policySettingsOptions.GameRecordRetryCount,
-			retryAttempt => TimeSpan.FromSeconds(_policySettingsOptions.GameRecordRetryWaitSec),
-			onRetry: (response, retryTime, context) => logger.LogWarning("LogOn:{logOn} | Message:拉單過於頻繁(兩次拉單時間間隔必須大於 10 秒 | Json:{jsonNode}", DateTime.Now.ToString("o"), response.Result.ToJsonString()));
-		var subTypes = SubTypes.GameRecord;
-		var data = $"s={(int)subTypes}&startTime={startTime.ToUnixTimeMilliseconds()}&endTime={endTime.ToUnixTimeMilliseconds()}";
-		var jsonNode = await retryPolicy
-			.ExecuteAsync(
-			async () => await GetAsync(
+				retryCount: _policySettingsOptions.GameRecordRetryCount,
+				retryAttempt => TimeSpan.FromSeconds(_policySettingsOptions.GameRecordRetryWaitSec),
+				onRetry: (response, retryTime, context) => logger.LogWarning("LogOn:{logOn} | Message:拉單過於頻繁(兩次拉單時間間隔必須大於 10 秒 | Json:{jsonNode}", DateTime.Now.ToString("o"), response.Result.ToJsonString()));
+
+		var data = $"s=6&startTime={startTime.ToUnixTimeMilliseconds()}&endTime={endTime.ToUnixTimeMilliseconds()}";
+		var jsonNode = await retryPolicy.ExecuteAsync(
+			() => GetAsync(
 				apiUrl: apiUrl,
-				types: subTypes,
 				deskey: deskey,
 				md5key: md5key,
 				agentId: agentId,
 				data: data,
-				cancellationToken: cancellationToken)
-			.ConfigureAwait(false))
+				logPrefix: nameof(GameRecordAsync),
+				cancellationToken: cancellationToken).AsTask())
 			.ConfigureAwait(false);
 
 		var dataResponse = jsonNode["d"]!;
@@ -82,7 +80,7 @@ internal class GameRecordApiClient(
 
 		foreach (var it in gameIds.Select((e, i) => new { Value = e, Index = i }))
 		{
-			yield return new GameRecordInfo(
+			yield return new GameRecordResp(
 				GameID: it.Value,
 				Account: accounts.ElementAt(it.Index).Replace($"{agentId}_", string.Empty),
 				ServerID: serverIds.ElementAt(it.Index),
@@ -121,22 +119,14 @@ internal class GameRecordApiClient(
 		}
 	}
 
-	private async ValueTask<JsonNode> GetAsync(
-		Uri apiUrl,
-		SubTypes types,
-		string deskey,
-		string md5key,
-		string agentId,
-		string data,
-		CancellationToken cancellationToken = default)
+	private async ValueTask<JsonNode> GetAsync(Uri apiUrl, string deskey, string md5key, string agentId, string data, string logPrefix, CancellationToken cancellationToken = default)
 	{
-		var timestamp = systemClock.CurrentTime.ToUnixTimeMilliseconds();
+		var timestamp = timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
 		var uriBuilder = new UriBuilder(new Uri(apiUrl, "/getRecordHandle"));
 		var query = HttpUtility.ParseQueryString(uriBuilder.Query);
 		query["agent"] = agentId;
 		query["timestamp"] = timestamp.ToString();
-		query["param"] = await cryptography
-			.GetAesEncryptAsync(
+		query["param"] = await cryptography.GetAesEncryptAsync(
 			data: data,
 			secretKey: deskey,
 			cancellationToken: cancellationToken)
@@ -144,14 +134,11 @@ internal class GameRecordApiClient(
 		query["key"] = cryptography.GetHash($"{agentId}{timestamp}{md5key}");
 		uriBuilder.Query = query.ToString();
 
-		var logPrefix = $"{nameof(GameApiClient)}.{types}";
-
 		var sw = Stopwatch.StartNew();
 
-		var httpResponseMessage = await client
-			.GetAsync(
-				requestUri: uriBuilder.ToString(),
-				cancellationToken: cancellationToken)
+		var httpResponseMessage = await client.GetAsync(
+			requestUri: uriBuilder.ToString(),
+			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		sw.Stop();
@@ -162,14 +149,15 @@ internal class GameRecordApiClient(
 			responseMessage = await sr.ReadToEndAsync(cancellationToken: cancellationToken).ConfigureAwait(false) ?? string.Empty;
 		}
 
-		var logEvent = new GameApiLogEvent
+		var logEvent = new
 		{
 			Path = httpResponseMessage.RequestMessage?.RequestUri?.AbsoluteUri.NoLongerThan(512) ?? string.Empty,
 			Method = httpResponseMessage.RequestMessage?.Method.ToString().NoLongerThan(8) ?? string.Empty,
 			Prefix = logPrefix,
 			ServerName = Environment.MachineName.NoLongerThan(128),
 			RequestHeaders = httpResponseMessage.RequestMessage?.Headers + httpResponseMessage.RequestMessage?.Content?.Headers?.ToString(),
-			RequestContent = data.NoLongerThan(4096),
+			RequestParameters = data.NoLongerThan(4096),
+			RequestContent = string.Empty,
 			ResponseHeaders = httpResponseMessage.Headers.ToString(),
 			ResponseContent = responseMessage.NoLongerThan(4096),
 			ResponseCode = (short)httpResponseMessage.StatusCode,

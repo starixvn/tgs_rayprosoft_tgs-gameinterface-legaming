@@ -10,7 +10,7 @@ using RichardSzalay.MockHttp;
 
 namespace Tgs.GameInterface.LEGaming.Core.UnitTest;
 
-public class BalanceUnitTest
+public class GameApiClient_AgentBalanceUnitTest
 {
 	[Fact]
 	public async Task Normal_Process()
@@ -27,16 +27,15 @@ public class BalanceUnitTest
 		var deskey = "706EB65DD6E6DF4C";
 		var md5key = "3E00054B89B31B7A";
 		var agentId = "200995";
-		var account = "4uk9399rb9qo";
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689585314239);
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1690340035435);
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
-		var data = "s=7&account=4uk9399rb9qo";
-		var param = "LxLJVtx15H2dgXaCSJNG9OQRmoSZ5fdqQNxK502gobo=";
+		var data = "s=14";
+		var param = "TVvTX3VbPPF8uoTUB9GG382q5wLB1kCJjq8gYecYEyc=";
 		_ = fakeCryptography.GetAesEncryptAsync(
 			data: Arg.Is(data),
 			secretKey: Arg.Is(deskey),
@@ -44,7 +43,7 @@ public class BalanceUnitTest
 			.Returns(param);
 
 		var dataMD5 = $"{agentId}{currentTime.ToUnixTimeMilliseconds()}{md5key}";
-		var key = "cc9b6211f41b5234b25ebd69be179a46";
+		var key = "2a9a46e4cb2ef009ce1ca3732227ec4f";
 		_ = fakeCryptography.GetHash(
 			data: Arg.Is(dataMD5))
 			.Returns(key);
@@ -60,15 +59,11 @@ public class BalanceUnitTest
 		var response = new JsonObject
 		{
 			["m"] = "/channelHandle",
-			["s"] = 107,
+			["s"] = 114,
 			["d"] = new JsonObject
 			{
 				["code"] = 0,
-				["account"] = "200995_4uk9399rb9qo",
-				["totalMoney"] = 0,
-				["freeMoney"] = 0,
-				["status"] = 0,
-				["gameStatus"] = 0
+				["money"] = "10000000.00"
 			}
 		};
 
@@ -83,18 +78,16 @@ public class BalanceUnitTest
 		var client = new GameApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
-		var actual = await client.BalanceAsync(
+		var actual = await client.AgentBalanceAsync(
 			apiUrl: apiUrl,
 			deskey: deskey,
 			md5key: md5key,
-			agentId: agentId,
-			account: account);
+			agentId: agentId);
 
-		Assert.NotNull(actual);
-		Assert.Equal(0.00m, actual.FreeMoney);
+		Assert.Equal(10000000.00m, actual);
 	}
 }

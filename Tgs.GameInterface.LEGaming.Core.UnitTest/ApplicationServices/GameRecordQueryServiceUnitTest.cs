@@ -5,22 +5,24 @@ using Tgs.GameInterface.LEGaming.Core.Models;
 
 namespace Tgs.GameInterface.LEGaming.Core.UnitTest.ApplicationServices;
 
-public class GameWagerQueryServiceUnitTest
+public class GameRecordQueryServiceUnitTest
 {
 	[Fact]
 	public async Task Player_Wins()
 	{
-		var query = new GameWagerQuery(
-			ApiUrl: new Uri("https://wc1-api.kewmn686.com/"),
-			Deskey: "706EB65DD6E6DF4C",
-			MD5key: "3E00054B89B31B7A",
-			AgentId: "200995",
-			StartTime: DateTimeOffset.Parse("2023-07-17T16:55:00.000+08:00"),
-			EndTime: DateTimeOffset.Parse("2023-07-17T17:00:00.000+08:00"));
+		var query = new GameRecordQuery
+		{
+			ApiUrl = new Uri("https://wc1-api.kewmn686.com/"),
+			Deskey = "706EB65DD6E6DF4C",
+			MD5key = "3E00054B89B31B7A",
+			AgentId = "200995",
+			StartTime = DateTimeOffset.Parse("2023-07-17T16:55:00.000+08:00"),
+			EndTime = DateTimeOffset.Parse("2023-07-17T17:00:00.000+08:00")
+		};
 
 		var fakeClient = Substitute.For<IGameRecordApiClient>();
 
-		var infos = new GameRecordInfo[]
+		var resps = new GameRecordResp[]
 		{
 			new(
 				GameID: "686-1689584115-15524392-1",
@@ -69,45 +71,47 @@ public class GameWagerQueryServiceUnitTest
 			startTime: Arg.Is(query.StartTime),
 			endTime: Arg.Is(query.EndTime),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(infos.ToAsyncEnumerable());
+			.Returns(resps.ToAsyncEnumerable());
 
-		var service = new GameWagerQueryService(fakeClient);
+		var service = new GameRecordQueryService(fakeClient);
 
 		var actual = await service
 			.QueryAsync(
 			query: query)
 			.ToArrayAsync()
-			?? Enumerable.Empty<GameWagerResult>();
+			?? Enumerable.Empty<GameRecordResult>();
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Any());
-		Assert.Equal(infos.First().GameID, actual.First().ExternalWagerId);
-		Assert.Equal(infos.First().KindID.ToString(), actual.First().ExternalGameId);
-		Assert.Equal(infos.First().Account, actual.First().PlayerCode);
-		Assert.Equal(infos.First().AllBet, actual.First().Bet);
-		Assert.Equal(infos.First().CellScore, actual.First().ValidBet);
+		Assert.Equal(resps.First().Account, actual.First().PlayerCode);
+		Assert.Equal(resps.First().GameID, actual.First().ExternalBetId);
+		Assert.Equal(resps.First().KindID.ToString(), actual.First().ExternalGameId);
+		Assert.Equal(resps.First().GameStartTime, actual.First().ExternalCreatedOn);
+		Assert.Equal(resps.First().GameEndTime, actual.First().ExternalClosedOn);
+		Assert.Equal(resps.First().AllBet, actual.First().Bet);
+		Assert.Equal(resps.First().CellScore, actual.First().ValidBet);
 		Assert.Equal(4.00m, actual.First().Settle);
-		Assert.Equal(infos.First().Revenue, actual.First().Commission);
-		Assert.Equal(infos.First().Profit, actual.First().WinLoss);
-		Assert.Equal(infos.First().GameStartTime, actual.First().ExternalCreatedOn);
-		Assert.Equal(infos.First().GameEndTime, actual.First().ExternalClosedOn);
-		Assert.Equal(infos.First().AdditionalData, actual.First().AdditionalData);
+		Assert.Equal(resps.First().Revenue, actual.First().Commission);
+		Assert.Equal(resps.First().Profit, actual.First().WinLoss);
+		Assert.Equal(resps.First().AdditionalData, actual.First().AdditionalData);
 	}
 
 	[Fact]
 	public async Task Player_Loses()
 	{
-		var query = new GameWagerQuery(
-			ApiUrl: new Uri("https://wc1-api.kewmn686.com/"),
-			Deskey: "706EB65DD6E6DF4C",
-			MD5key: "3E00054B89B31B7A",
-			AgentId: "200995",
-			StartTime: DateTimeOffset.Parse("2023-07-17T16:55:00.000+08:00"),
-			EndTime: DateTimeOffset.Parse("2023-07-17T17:00:00.000+08:00"));
+		var query = new GameRecordQuery
+		{
+			ApiUrl = new Uri("https://wc1-api.kewmn686.com/"),
+			Deskey = "706EB65DD6E6DF4C",
+			MD5key = "3E00054B89B31B7A",
+			AgentId = "200995",
+			StartTime = DateTimeOffset.Parse("2023-07-17T16:55:00.000+08:00"),
+			EndTime = DateTimeOffset.Parse("2023-07-17T17:00:00.000+08:00")
+		};
 
 		var fakeClient = Substitute.For<IGameRecordApiClient>();
 
-		var infos = new GameRecordInfo[]
+		var resps = new GameRecordResp[]
 		{
 			new(
 				GameID: "686-1689584140-15524700-1",
@@ -156,46 +160,48 @@ public class GameWagerQueryServiceUnitTest
 			startTime: Arg.Is(query.StartTime),
 			endTime: Arg.Is(query.EndTime),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(infos.ToAsyncEnumerable());
+			.Returns(resps.ToAsyncEnumerable());
 
-		var service = new GameWagerQueryService(
+		var service = new GameRecordQueryService(
 			fakeClient);
 
 		var actual = await service
 			.QueryAsync(
 			query: query)
 			.ToArrayAsync()
-			?? Enumerable.Empty<GameWagerResult>();
+			?? Enumerable.Empty<GameRecordResult>();
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Any());
-		Assert.Equal(infos.First().GameID, actual.First().ExternalWagerId);
-		Assert.Equal(infos.First().KindID.ToString(), actual.First().ExternalGameId);
-		Assert.Equal(infos.First().Account, actual.First().PlayerCode);
-		Assert.Equal(infos.First().AllBet, actual.First().Bet);
-		Assert.Equal(infos.First().CellScore, actual.First().ValidBet);
+		Assert.Equal(resps.First().Account, actual.First().PlayerCode);
+		Assert.Equal(resps.First().GameID, actual.First().ExternalBetId);
+		Assert.Equal(resps.First().KindID.ToString(), actual.First().ExternalGameId);
+		Assert.Equal(resps.First().GameStartTime, actual.First().ExternalCreatedOn);
+		Assert.Equal(resps.First().GameEndTime, actual.First().ExternalClosedOn);
+		Assert.Equal(resps.First().AllBet, actual.First().Bet);
+		Assert.Equal(resps.First().CellScore, actual.First().ValidBet);
 		Assert.Equal(0, actual.First().Settle);
-		Assert.Equal(infos.First().Revenue, actual.First().Commission);
-		Assert.Equal(infos.First().Profit, actual.First().WinLoss);
-		Assert.Equal(infos.First().GameStartTime, actual.First().ExternalCreatedOn);
-		Assert.Equal(infos.First().GameEndTime, actual.First().ExternalClosedOn);
-		Assert.Equal(infos.First().AdditionalData, actual.First().AdditionalData);
+		Assert.Equal(resps.First().Revenue, actual.First().Commission);
+		Assert.Equal(resps.First().Profit, actual.First().WinLoss);
+		Assert.Equal(resps.First().AdditionalData, actual.First().AdditionalData);
 	}
 
 	[Fact]
 	public async Task Player_Versus_Banker_Versus_Player()
 	{
-		var query = new GameWagerQuery(
-			ApiUrl: new Uri("https://wc1-api.kewmn686.com/"),
-			Deskey: "706EB65DD6E6DF4C",
-			MD5key: "3E00054B89B31B7A",
-			AgentId: "200995",
-			StartTime: DateTimeOffset.Parse("2023-07-18T11:59:00.000+08:00"),
-			EndTime: DateTimeOffset.Parse("2023-07-18T12:09:00.000+08:00"));
+		var query = new GameRecordQuery
+		{
+			ApiUrl = new Uri("https://wc1-api.kewmn686.com/"),
+			Deskey = "706EB65DD6E6DF4C",
+			MD5key = "3E00054B89B31B7A",
+			AgentId = "200995",
+			StartTime = DateTimeOffset.Parse("2023-07-18T11:59:00.000+08:00"),
+			EndTime = DateTimeOffset.Parse("2023-07-18T12:09:00.000+08:00")
+		};
 
 		var fakeClient = Substitute.For<IGameRecordApiClient>();
 
-		var infos = new GameRecordInfo[]
+		var resps = new GameRecordResp[]
 		{
 			new(
 				GameID: "686-1689652975-19588451-1",
@@ -238,52 +244,54 @@ public class GameWagerQueryServiceUnitTest
 		_ = fakeClient
 			.GameRecordAsync(
 			apiUrl: Arg.Is(query.ApiUrl),
-			deskey: Arg.Is(query.Deskey),
-			md5key: Arg.Is(query.MD5key),
-			agentId: Arg.Is(query.AgentId),
-			startTime: Arg.Is(query.StartTime),
-			endTime: Arg.Is(query.EndTime),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(infos.ToAsyncEnumerable());
+				deskey: Arg.Is(query.Deskey),
+				md5key: Arg.Is(query.MD5key),
+				agentId: Arg.Is(query.AgentId),
+				startTime: Arg.Is(query.StartTime),
+				endTime: Arg.Is(query.EndTime),
+				cancellationToken: Arg.Any<CancellationToken>())
+				.Returns(resps.ToAsyncEnumerable());
 
-		var service = new GameWagerQueryService(
+		var service = new GameRecordQueryService(
 			fakeClient);
 
 		var actual = await service
 			.QueryAsync(
 			query: query)
 			.ToArrayAsync()
-			?? Enumerable.Empty<GameWagerResult>();
+			?? Enumerable.Empty<GameRecordResult>();
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Any());
-		Assert.Equal(infos.First().GameID, actual.First().ExternalWagerId);
-		Assert.Equal(infos.First().KindID.ToString(), actual.First().ExternalGameId);
-		Assert.Equal(infos.First().Account, actual.First().PlayerCode);
-		Assert.Equal(infos.First().AllBet, actual.First().Bet);
-		Assert.Equal(infos.First().CellScore, actual.First().ValidBet);
+		Assert.Equal(resps.First().Account, actual.First().PlayerCode);
+		Assert.Equal(resps.First().GameID, actual.First().ExternalBetId);
+		Assert.Equal(resps.First().KindID.ToString(), actual.First().ExternalGameId);
+		Assert.Equal(resps.First().GameStartTime, actual.First().ExternalCreatedOn);
+		Assert.Equal(resps.First().GameEndTime, actual.First().ExternalClosedOn);
+		Assert.Equal(resps.First().AllBet, actual.First().Bet);
+		Assert.Equal(resps.First().CellScore, actual.First().ValidBet);
 		Assert.Equal(4m, actual.First().Settle);
-		Assert.Equal(infos.First().Revenue, actual.First().Commission);
-		Assert.Equal(infos.First().Profit, actual.First().WinLoss);
-		Assert.Equal(infos.First().GameStartTime, actual.First().ExternalCreatedOn);
-		Assert.Equal(infos.First().GameEndTime, actual.First().ExternalClosedOn);
-		Assert.Equal(infos.First().AdditionalData, actual.First().AdditionalData);
+		Assert.Equal(resps.First().Revenue, actual.First().Commission);
+		Assert.Equal(resps.First().Profit, actual.First().WinLoss);
+		Assert.Equal(resps.First().AdditionalData, actual.First().AdditionalData);
 	}
 
 	[Fact]
 	public async Task Player_Versus_Banker_Versus_Player_Versus_Tie()
 	{
-		var query = new GameWagerQuery(
-			ApiUrl: new Uri("https://wc1-api.kewmn686.com/"),
-			Deskey: "706EB65DD6E6DF4C",
-			MD5key: "3E00054B89B31B7A",
-			AgentId: "200995",
-			StartTime: DateTimeOffset.Parse("2023-07-18T11:59:00.000+08:00"),
-			EndTime: DateTimeOffset.Parse("2023-07-18T12:09:00.000+08:00"));
+		var query = new GameRecordQuery
+		{
+			ApiUrl = new Uri("https://wc1-api.kewmn686.com/"),
+			Deskey = "706EB65DD6E6DF4C",
+			MD5key = "3E00054B89B31B7A",
+			AgentId = "200995",
+			StartTime = DateTimeOffset.Parse("2023-07-18T11:59:00.000+08:00"),
+			EndTime = DateTimeOffset.Parse("2023-07-18T12:09:00.000+08:00")
+		};
 
 		var fakeClient = Substitute.For<IGameRecordApiClient>();
 
-		var infos = new GameRecordInfo[]
+		var resps = new GameRecordResp[]
 		{
 			new(
 				GameID: "686-1689653000-19588758-1",
@@ -332,29 +340,29 @@ public class GameWagerQueryServiceUnitTest
 			startTime: Arg.Is(query.StartTime),
 			endTime: Arg.Is(query.EndTime),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(infos.ToAsyncEnumerable());
+			.Returns(resps.ToAsyncEnumerable());
 
-		var service = new GameWagerQueryService(
+		var service = new GameRecordQueryService(
 			fakeClient);
 
 		var actual = await service
 			.QueryAsync(
 			query: query)
 			.ToArrayAsync()
-			?? Enumerable.Empty<GameWagerResult>();
+			?? Enumerable.Empty<GameRecordResult>();
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Any());
-		Assert.Equal(infos.First().GameID, actual.First().ExternalWagerId);
-		Assert.Equal(infos.First().KindID.ToString(), actual.First().ExternalGameId);
-		Assert.Equal(infos.First().Account, actual.First().PlayerCode);
-		Assert.Equal(infos.First().AllBet, actual.First().Bet);
-		Assert.Equal(infos.First().CellScore, actual.First().ValidBet);
+		Assert.Equal(resps.First().Account, actual.First().PlayerCode);
+		Assert.Equal(resps.First().GameID, actual.First().ExternalBetId);
+		Assert.Equal(resps.First().KindID.ToString(), actual.First().ExternalGameId);
+		Assert.Equal(resps.First().GameStartTime, actual.First().ExternalCreatedOn);
+		Assert.Equal(resps.First().GameEndTime, actual.First().ExternalClosedOn);
+		Assert.Equal(resps.First().AllBet, actual.First().Bet);
+		Assert.Equal(resps.First().CellScore, actual.First().ValidBet);
 		Assert.Equal(4m, actual.First().Settle);
-		Assert.Equal(infos.First().Revenue, actual.First().Commission);
-		Assert.Equal(infos.First().Profit, actual.First().WinLoss);
-		Assert.Equal(infos.First().GameStartTime, actual.First().ExternalCreatedOn);
-		Assert.Equal(infos.First().GameEndTime, actual.First().ExternalClosedOn);
-		Assert.Equal(infos.First().AdditionalData, actual.First().AdditionalData);
+		Assert.Equal(resps.First().Revenue, actual.First().Commission);
+		Assert.Equal(resps.First().Profit, actual.First().WinLoss);
+		Assert.Equal(resps.First().AdditionalData, actual.First().AdditionalData);
 	}
 }

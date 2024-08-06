@@ -10,7 +10,7 @@ using RichardSzalay.MockHttp;
 
 namespace Tgs.GameInterface.LEGaming.Core.UnitTest;
 
-public class OrderStatusUnitTest
+public record GameApiClient_DepositUnitTest
 {
 	[Fact]
 	public async Task Normal_Process()
@@ -27,16 +27,19 @@ public class OrderStatusUnitTest
 		var deskey = "706EB65DD6E6DF4C";
 		var md5key = "3E00054B89B31B7A";
 		var agentId = "200995";
+		var currency = "CNY";
+		var account = "4uk9399rb9qo";
 		var orderId = "200995202307180240242304uk9399rb9qo";
+		var money = 1.0m;
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689649638659);
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		var currentTime = DateTimeOffset.Parse("2023-07-18T02:40:24.230+00:00");
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
-		var data = "s=4&&orderid=200995202307180240242304uk9399rb9qo";
-		var param = "sXIdP1BwVgthYuYHM6eZZmH1GNxEXUWQXuTz9IcmJfqPVPYaUJ6GH3QZ2I7eK98YhvZGcOD1VSQXpijlHPTEiA==";
+		var data = "s=2&account=4uk9399rb9qo&money=1.0&orderid=200995202307180240242304uk9399rb9qo&currency=CNY";
+		var param = "9BKbWenbOpD7JD8jm2XOGDdvMatt5jkN9bInYdABoiOAeTiwMbg4NxDsLp7/LhHd1dFKzy51pD2g331dMTPBXEg8ygcwLrvnz9PsPIDwJOM=";
 		_ = fakeCryptography.GetAesEncryptAsync(
 			data: Arg.Is(data),
 			secretKey: Arg.Is(deskey),
@@ -44,7 +47,7 @@ public class OrderStatusUnitTest
 			.Returns(param);
 
 		var dataMD5 = $"{agentId}{currentTime.ToUnixTimeMilliseconds()}{md5key}";
-		var key = "da5715e12bca5cbd3facb43b9db3e45d";
+		var key = "dc31fd6ee81fe24bff9a0ff3d8942e37";
 		_ = fakeCryptography.GetHash(
 			data: Arg.Is(dataMD5))
 			.Returns(key);
@@ -60,12 +63,11 @@ public class OrderStatusUnitTest
 		var response = new JsonObject
 		{
 			["m"] = "/channelHandle",
-			["s"] = 104,
+			["s"] = 102,
 			["d"] = new JsonObject
 			{
 				["code"] = 0,
-				["status"] = 0,
-				["money"] = 1
+				["money"] = "1.00"
 			}
 		};
 
@@ -80,23 +82,26 @@ public class OrderStatusUnitTest
 		var client = new GameApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
-		var actual = await client
-			.OrderStatusAsync(
+		var actual = await client.DepositAsync(
 			apiUrl: apiUrl,
 			deskey: deskey,
 			md5key: md5key,
 			agentId: agentId,
-			orderId: orderId);
+			currency: currency,
+			account: account,
+			orderId: orderId,
+			money: money);
 
-		Assert.True(actual);
+		Assert.NotNull(actual);
+		Assert.Equal(response.ToJsonString(), actual.Resp);
 	}
 
 	[Fact]
-	public async Task Order_Does_Not_Exist()
+	public async Task Code_Is_39()
 	{
 		var policySettingsOptions = Options.Create(new PolicySettingsOptions
 		{
@@ -110,16 +115,19 @@ public class OrderStatusUnitTest
 		var deskey = "706EB65DD6E6DF4C";
 		var md5key = "3E00054B89B31B7A";
 		var agentId = "200995";
-		var orderId = "200995202307180240242305uk9399rb9qo";
+		var account = "4uk9399rb9qo";
+		var currency = "CNY";
+		var orderId = "200995202307180240242304uk9399rb9qo";
+		var money = 1.0m;
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689649638659);
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		var currentTime = DateTimeOffset.Parse("2023-07-18T02:40:24.230+00:00");
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
-		var data = "s=4&&orderid=200995202307180240242305uk9399rb9qo";
-		var param = "sXIdP1BwVgthYuYHM6eZZmH1GNxEXUWQXuTz9IcmJfr+lFULeb8vl3e4SKaqGSf8hvZGcOD1VSQXpijlHPTEiA==";
+		var data = "s=2&account=4uk9399rb9qo&money=1.0&orderid=200995202307180240242304uk9399rb9qo&currency=CNY";
+		var param = "9BKbWenbOpD7JD8jm2XOGDdvMatt5jkN9bInYdABoiOAeTiwMbg4NxDsLp7/LhHd1dFKzy51pD2g331dMTPBXEg8ygcwLrvnz9PsPIDwJOM=";
 		_ = fakeCryptography.GetAesEncryptAsync(
 			data: Arg.Is(data),
 			secretKey: Arg.Is(deskey),
@@ -127,7 +135,7 @@ public class OrderStatusUnitTest
 			.Returns(param);
 
 		var dataMD5 = $"{agentId}{currentTime.ToUnixTimeMilliseconds()}{md5key}";
-		var key = "56d4ec70e0079b7f53549110e8e34e67";
+		var key = "dc31fd6ee81fe24bff9a0ff3d8942e37";
 		_ = fakeCryptography.GetHash(
 			data: Arg.Is(dataMD5))
 			.Returns(key);
@@ -143,12 +151,10 @@ public class OrderStatusUnitTest
 		var response = new JsonObject
 		{
 			["m"] = "/channelHandle",
-			["s"] = 104,
+			["s"] = 102,
 			["d"] = new JsonObject
 			{
-				["code"] = 0,
-				["status"] = -1,
-				["money"] = 0
+				["code"] = 39
 			}
 		};
 
@@ -163,17 +169,20 @@ public class OrderStatusUnitTest
 		var client = new GameApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
-		var actual = await client.OrderStatusAsync(
-			apiUrl: apiUrl,
-			deskey: deskey,
-			md5key: md5key,
-			agentId: agentId,
-			orderId: orderId);
-
-		Assert.False(actual);
+		_ = await Assert.ThrowsAsync<MockHttpMatchException>(
+			() => client.DepositAsync(
+				apiUrl: apiUrl,
+				deskey: deskey,
+				md5key: md5key,
+				agentId: agentId,
+				currency: currency,
+				account: account,
+				orderId: orderId,
+				money: money)
+			.AsTask());
 	}
 }

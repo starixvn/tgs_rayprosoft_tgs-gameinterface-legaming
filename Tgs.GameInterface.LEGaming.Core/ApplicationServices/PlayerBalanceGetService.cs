@@ -9,20 +9,20 @@ public class PlayerBalanceGetService(
 		PlayerBalanceQuery query,
 		CancellationToken cancellationToken = default)
 	{
-		var info = await client
-			.BalanceAsync(
+		var resp = await client.BalanceAsync(
 			apiUrl: query.ApiUrl,
 			deskey: query.Deskey,
 			md5key: query.MD5key,
 			agentId: query.AgentId,
+			currency: query.AgentCurrency,
 			account: query.PlayerCode,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		return new PlayerBalanceResult
 		{
-			Balance = info.TotalMoney,
-			FreeBalance = info.FreeMoney
+			Balance = resp.TotalMoney,
+			FreeBalance = resp.FreeMoney
 		};
 	}
 }

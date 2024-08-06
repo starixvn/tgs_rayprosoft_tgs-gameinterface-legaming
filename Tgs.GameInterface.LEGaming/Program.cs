@@ -5,6 +5,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameInterface.LEGaming;
+using Tgs.GameInterface.LEGaming.Core;
 using Tgs.GameInterface.LEGaming.GrpcServices;
 
 var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
@@ -64,12 +65,15 @@ builder.Services.AddSwaggerGen(c =>
 	}
 });
 
-builder.Services.AddGameInterface(
-	(options, sp) =>
+builder.Services
+	.AddOptions<PolicySettingsOptions>()
+	.Configure((PolicySettingsOptions options, IServiceProvider sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
 		configuration.GetSection("PolicySettings").Bind(options);
-	});
+	})
+	.Services
+	.AddGameInterfaceCore();
 
 builder.Services
 	.AddOpenTelemetry()

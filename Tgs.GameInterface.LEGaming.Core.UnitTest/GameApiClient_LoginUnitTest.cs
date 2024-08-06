@@ -10,7 +10,7 @@ using RichardSzalay.MockHttp;
 
 namespace Tgs.GameInterface.LEGaming.Core.UnitTest;
 
-public record WithdrawUnitTest
+public class GameApiClient_LoginUnitTest
 {
 	[Fact]
 	public async Task Normal_Process()
@@ -23,22 +23,24 @@ public record WithdrawUnitTest
 			GameRecordRetryWaitSec = 1
 		});
 
-		Uri apiUrl = new Uri("https://wc1-api.kewmn686.com/");
+		var apiUrl = new Uri("https://wc1-api.kewmn686.com/");
 		var deskey = "706EB65DD6E6DF4C";
 		var md5key = "3E00054B89B31B7A";
 		var agentId = "200995";
+		var currency = "CNY";
 		var account = "4uk9399rb9qo";
-		var orderId = "200995202307180247377734uk9399rb9qo";
-		var money = 1.0m;
+		var ipAddress = "127.0.0.1";
+		var lineCode = "GPI_HKD";
+		var kindID = "0";
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-		var currentTime = DateTimeOffset.Parse("2023-07-18T02:47:37.773+00:00");
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		var currentTime = DateTimeOffset.Parse("2023-07-18T03:20:28.852+00:00");
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
-		var data = "s=3&account=4uk9399rb9qo&money=1.0&orderid=200995202307180247377734uk9399rb9qo";
-		var param = "GH0Qljygg7xF2c6Y96voiTdvMatt5jkN9bInYdABoiOAeTiwMbg4NxDsLp7/LhHdGMUcaYastbwoiSHEyUZqG1ReJCs3i59vo4LBa23bhl0=";
+		var data = "s=0&account=4uk9399rb9qo&money=0&orderid=200995202307180320288524uk9399rb9qo&ip=127.0.0.1&lineCode=GPI_HKD&KindID=0&currency=CNY";
+		var param = "HQN9/G1xjatVFubjmWOt1qOD/F6kv2maQn09UTu/K8Wqcq16IBeEvLm3txrRJ8R8sgrPlCeNHHXMTN1SOIIQkp0w9Kig2V9UKrPRprh4M+X/NBrEYMHU+lDW4RsR/R/xgvAreKAny/sD8BhoOHoHr0UTotxZ5BoA9bhTO2jD/Tc=";
 		_ = fakeCryptography.GetAesEncryptAsync(
 			data: Arg.Is(data),
 			secretKey: Arg.Is(deskey),
@@ -46,7 +48,7 @@ public record WithdrawUnitTest
 			.Returns(param);
 
 		var dataMD5 = $"{agentId}{currentTime.ToUnixTimeMilliseconds()}{md5key}";
-		var key = "c4bffb92e6a490445c82f6c43a84e0bc";
+		var key = "3971af284eac5bc9bf844b08a6155fd8";
 		_ = fakeCryptography.GetHash(
 			data: Arg.Is(dataMD5))
 			.Returns(key);
@@ -62,11 +64,11 @@ public record WithdrawUnitTest
 		var response = new JsonObject
 		{
 			["m"] = "/channelHandle",
-			["s"] = 103,
+			["s"] = 100,
 			["d"] = new JsonObject
 			{
 				["code"] = 0,
-				["money"] = "0.00"
+				["url"] = "https://wc1-g-h5.kewmn686.com/",
 			}
 		};
 
@@ -81,20 +83,22 @@ public record WithdrawUnitTest
 		var client = new GameApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
-		var actual = await client.WithdrawAsync(
+		var actual = await client.LoginAsync(
 			apiUrl: apiUrl,
 			deskey: deskey,
 			md5key: md5key,
 			agentId: agentId,
+			currency: currency,
 			account: account,
-			orderId: orderId,
-			money: money);
+			ipAddress: ipAddress,
+			lineCode: lineCode,
+			kindID: kindID);
 
 		Assert.NotNull(actual);
-		Assert.Equal(response.ToJsonString(), actual.Resp);
+		Assert.Equal("https://wc1-g-h5.kewmn686.com/", actual);
 	}
 }

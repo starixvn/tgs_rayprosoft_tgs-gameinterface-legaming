@@ -4,11 +4,11 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
 
-internal class GameWagerQueryService(
-	IGameRecordApiClient client) : IQueryService<GameWagerQuery, GameWagerResult>
+internal class GameRecordQueryService(
+	IGameRecordApiClient client) : IQueryService<GameRecordQuery, GameRecordResult>
 {
-	public async IAsyncEnumerable<GameWagerResult> QueryAsync(
-		GameWagerQuery query,
+	public async IAsyncEnumerable<GameRecordResult> QueryAsync(
+		GameRecordQuery query,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var gameRecords = await client
@@ -23,7 +23,7 @@ internal class GameWagerQueryService(
 			.ToArrayAsync(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false)
-			?? Enumerable.Empty<GameRecordInfo>();
+			?? Enumerable.Empty<GameRecordResp>();
 
 		if (!gameRecords.Any())
 		{
@@ -32,10 +32,10 @@ internal class GameWagerQueryService(
 
 		foreach (var gameRecord in gameRecords)
 		{
-			yield return new GameWagerResult(
-				ExternalWagerId: gameRecord.GameID,
-				ExternalGameId: gameRecord.KindID.ToString(),
+			yield return new GameRecordResult(
 				PlayerCode: gameRecord.Account,
+				ExternalBetId: gameRecord.GameID,
+				ExternalGameId: gameRecord.KindID.ToString(),
 				ExternalCreatedOn: gameRecord.GameStartTime,
 				ExternalClosedOn: gameRecord.GameEndTime,
 				Bet: gameRecord.AllBet,
