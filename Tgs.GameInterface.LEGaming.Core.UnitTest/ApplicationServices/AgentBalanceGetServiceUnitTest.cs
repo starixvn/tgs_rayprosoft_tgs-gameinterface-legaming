@@ -8,11 +8,13 @@ public class AgentBalanceGetServiceUnitTest
 	[Fact]
 	public async Task Normal_ProcessAsync()
 	{
-		var query = new AgentBalanceQuery(
-			ApiUrl: new Uri("https://wc1-api.kewmn686.com/"),
-			Deskey: "706EB65DD6E6DF4C",
-			MD5key: "3E00054B89B31B7A",
-			AgentId: "200995");
+		var query = new AgentBalanceQuery
+		{
+			ApiUrl = new Uri("https://wc1-api.kewmn686.com/"),
+			Deskey = "706EB65DD6E6DF4C",
+			MD5key = "3E00054B89B31B7A",
+			AgentId = "200995"
+		};
 
 		var fakeClient = Substitute.For<IGameApiClient>();
 

@@ -21,7 +21,7 @@ public class HashCryptographyUnitTest
 	{
 		var hashCryptography = new HashCryptography();
 		var secretKey = "706EB65DD6E6DF4C";
-		var data = $"s={(int)SubTypes.Balance}&account=4uk9399rb9qo";
+		var data = $"s=7&account=4uk9399rb9qo";
 		var actual = await hashCryptography
 			.GetAesEncryptAsync(
 			data: data,
@@ -36,7 +36,7 @@ public class HashCryptographyUnitTest
 	{
 		var hashCryptography = new HashCryptography();
 		var secretKey = "706EB65DD6E6DF4C";
-		var data = $"s={(int)SubTypes.Deposit}&account=4uk9399rb9qo&orderid=200995202307171346360524uk9399rb9qo&money=1";
+		var data = $"s=2&account=4uk9399rb9qo&orderid=200995202307171346360524uk9399rb9qo&money=1";
 		var actual = await hashCryptography
 			.GetAesEncryptAsync(
 			data: data,
@@ -51,7 +51,7 @@ public class HashCryptographyUnitTest
 	{
 		var hashCryptography = new HashCryptography();
 		var secretKey = "706EB65DD6E6DF4C";
-		var data = $"s={(int)SubTypes.Withdraw}&account=4uk9399rb9qo&orderid=200995202307171354537634uk9399rb9qo&money=1";
+		var data = $"s=3&account=4uk9399rb9qo&orderid=200995202307171354537634uk9399rb9qo&money=1";
 		var actual = await hashCryptography
 			.GetAesEncryptAsync(
 			data: data,
@@ -66,7 +66,7 @@ public class HashCryptographyUnitTest
 	{
 		var hashCryptography = new HashCryptography();
 		var secretKey = "706EB65DD6E6DF4C";
-		var data = $"s={(int)SubTypes.Login}&account=4uk9399rb9qo&money=0&orderid=200995202307171357417574uk9399rb9qo&ip=114.33.41.237&lineCode=GPI_HKD&KindID=0";
+		var data = $"s=0&account=4uk9399rb9qo&money=0&orderid=200995202307171357417574uk9399rb9qo&ip=114.33.41.237&lineCode=GPI_HKD&KindID=0";
 		var actual = await hashCryptography
 			.GetAesEncryptAsync(
 			data: data,
@@ -81,7 +81,7 @@ public class HashCryptographyUnitTest
 	{
 		var hashCryptography = new HashCryptography();
 		var secretKey = "706EB65DD6E6DF4C";
-		var data = $"s={(int)SubTypes.GameRecord}&startTime=1689573304660&endTime=1689573604660";
+		var data = $"s=6&startTime=1689573304660&endTime=1689573604660";
 		var actual = await hashCryptography
 			.GetAesEncryptAsync(
 			data: data,

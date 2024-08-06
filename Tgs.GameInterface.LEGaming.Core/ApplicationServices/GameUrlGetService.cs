@@ -13,6 +13,7 @@ public class GameUrlGetService(
 			deskey: query.Deskey,
 			md5key: query.MD5key,
 			agentId: query.AgentId,
+			currency: query.AgentCurrency,
 			account: query.PlayerCode,
 			ipAddress: query.IpAddress,
 			lineCode: query.BrandCode,

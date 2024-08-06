@@ -1,8 +1,24 @@
-﻿namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
+﻿using System.ComponentModel;
 
-public record FundStatusQuery(
-	Uri ApiUrl,
-	string Deskey,
-	string MD5key,
-	string AgentId,
-	string OrderId);
+using System.ComponentModel.DataAnnotations;
+
+namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
+
+public record FundStatusQuery
+{
+	[Required]
+	[DefaultValue(typeof(Uri), "https://wc1-api.kewmn686.com/")]
+	public Uri ApiUrl { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(string), "706EB65DD6E6DF4C")]
+	public string Deskey { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(string), "3E00054B89B31B7A")]
+	public string MD5key { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(string), "200995")]
+	public string AgentId { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(string), "200995202408061335009994ucmqplxb029")]
+	public string OrderId { get; set; } = default!;
+}

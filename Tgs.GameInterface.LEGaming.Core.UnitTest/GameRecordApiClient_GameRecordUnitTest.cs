@@ -11,7 +11,7 @@ using Tgs.GameInterface.LEGaming.Core.Models;
 
 namespace Tgs.GameInterface.LEGaming.Core.UnitTest;
 
-public class GameRecordUnitTest
+public class GameRecordApiClient_GameRecordUnitTest
 {
 	[Fact]
 	public async Task Normal_Process()
@@ -32,10 +32,10 @@ public class GameRecordUnitTest
 		var endTime = DateTimeOffset.Parse("2023-07-17T17:00:00+08:00");
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
 		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689586504832);
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
 		var data = "s=6&startTime=1689584100000&endTime=1689584400000";
 		var param = "IvzEoNbMqRigzbXIyXr57L0CX7PwyeoP0ZKxXnUD7eWfOeNawl6V2011CvUs4FYPQaUG2zsAqsctjCu/8MMYqg==";
@@ -150,8 +150,8 @@ public class GameRecordUnitTest
 		var client = new GameRecordApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
 		var actual = await client.GameRecordAsync(
@@ -162,7 +162,7 @@ public class GameRecordUnitTest
 			startTime: startTime,
 			endTime: endTime)
 			.ToArrayAsync()
-			?? Enumerable.Empty<GameRecordInfo>();
+			?? Enumerable.Empty<GameRecordResp>();
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Any());
@@ -203,10 +203,10 @@ public class GameRecordUnitTest
 		var endTime = DateTimeOffset.Parse("2023-07-17T17:00:00+08:00");
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
 		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689586504832);
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
 		var data = "s=6&startTime=1689584100000&endTime=1689584400000";
 		var param = "IvzEoNbMqRigzbXIyXr57L0CX7PwyeoP0ZKxXnUD7eWfOeNawl6V2011CvUs4FYPQaUG2zsAqsctjCu/8MMYqg==";
@@ -253,8 +253,8 @@ public class GameRecordUnitTest
 		var client = new GameRecordApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
 		var actual = await client.GameRecordAsync(
@@ -265,7 +265,7 @@ public class GameRecordUnitTest
 			startTime: startTime,
 			endTime: endTime)
 			.ToArrayAsync()
-			?? Enumerable.Empty<GameRecordInfo>();
+			?? Enumerable.Empty<GameRecordResp>();
 
 		Assert.NotNull(actual);
 		Assert.False(actual.Any());
@@ -290,10 +290,10 @@ public class GameRecordUnitTest
 		var endTime = DateTimeOffset.Parse("2023-07-17T17:00:00+08:00");
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
 		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689586504832);
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
 		var data = "s=6&startTime=1689584100000&endTime=1689584400000";
 		var param = "IvzEoNbMqRigzbXIyXr57L0CX7PwyeoP0ZKxXnUD7eWfOeNawl6V2011CvUs4FYPQaUG2zsAqsctjCu/8MMYqg==";
@@ -338,8 +338,8 @@ public class GameRecordUnitTest
 		var client = new GameRecordApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
 		_ = await Assert.ThrowsAsync<MockHttpMatchException>(
@@ -373,10 +373,10 @@ public class GameRecordUnitTest
 		var endTime = DateTimeOffset.FromUnixTimeMilliseconds(1689674400000);
 
 		var fakeCryptography = Substitute.For<IHashCryptography>();
-		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
 
 		var currentTime = DateTimeOffset.FromUnixTimeMilliseconds(1689674616995);
-		_ = fakeSystemClock.CurrentTime.Returns(currentTime);
+		_ = fakeTimeProvider.GetUtcNow().Returns(currentTime);
 
 		var data = "s=6&startTime=1689673800000&endTime=1689674400000";
 		var param = "IvzEoNbMqRigzbXIyXr57Krg02ozH119Vi6VYTEUdnoRYjq/jj6ecM59xxQrSOT8QaUG2zsAqsctjCu/8MMYqg==";
@@ -475,8 +475,8 @@ public class GameRecordUnitTest
 		var client = new GameRecordApiClient(
 			fakeLog,
 			policySettingsOptions,
+			fakeTimeProvider,
 			fakeCryptography,
-			fakeSystemClock,
 			fakeHttpClient);
 
 		var actual = await client.GameRecordAsync(
@@ -487,7 +487,7 @@ public class GameRecordUnitTest
 			startTime: startTime,
 			endTime: endTime)
 			.ToArrayAsync()
-			?? Enumerable.Empty<GameRecordInfo>();
+			?? Enumerable.Empty<GameRecordResp>();
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Any());

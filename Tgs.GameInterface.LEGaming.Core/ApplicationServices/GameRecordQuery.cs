@@ -1,0 +1,27 @@
+﻿using System.ComponentModel;
+
+using System.ComponentModel.DataAnnotations;
+
+namespace Tgs.GameInterface.LEGaming.Core.ApplicationServices;
+
+public record GameRecordQuery
+{
+	[Required]
+	[DefaultValue(typeof(Uri), "https://wc1-record.kewmn686.com/")]
+	public Uri ApiUrl { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(string), "706EB65DD6E6DF4C")]
+	public string Deskey { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(string), "3E00054B89B31B7A")]
+	public string MD5key { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(string), "200995")]
+	public string AgentId { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(DateTimeOffset), "2023-07-18T11:59:00+08:00")]
+	public DateTimeOffset StartTime { get; set; } = default!;
+	[Required]
+	[DefaultValue(typeof(DateTimeOffset), "2023-07-18T12:09:00+08:00")]
+	public DateTimeOffset EndTime { get; set; } = default!;
+}
