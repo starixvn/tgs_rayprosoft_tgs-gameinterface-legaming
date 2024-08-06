@@ -96,9 +96,10 @@ message BaseReply {
 }
 
 message PlayerBalanceReply {
-	phoenix.protobuf.DecimalValue balance = 1;
-	phoenix.protobuf.DecimalValue free_balance = 2;
-	phoenix.protobuf.DecimalValue outstanding_balance = 3;
+	bool is_player_exist = 1;
+	phoenix.protobuf.DecimalValue balance = 2;
+	phoenix.protobuf.DecimalValue free_balance = 3;
+	phoenix.protobuf.DecimalValue outstanding_balance = 4;
 }
 
 message AgentBalanceReply {

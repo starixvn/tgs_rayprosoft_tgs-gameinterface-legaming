@@ -22,6 +22,7 @@ public class PlayerBalanceGetServiceUnitTest
 		var fakeClient = Substitute.For<IGameApiClient>();
 
 		var resp = new BalanceResp(
+			IsPlayerExist: true,
 			TotalMoney: 100,
 			FreeMoney: 98);
 		_ = fakeClient.BalanceAsync(
@@ -39,6 +40,7 @@ public class PlayerBalanceGetServiceUnitTest
 		var actual = await service.GetAsync(query: query);
 
 		Assert.NotNull(actual);
+		Assert.True( actual.IsPlayerExist);
 		Assert.Equal(100, actual.Balance);
 		Assert.Equal(98, actual.FreeBalance);
 		Assert.Equal(2, actual.OutstandingBalance);

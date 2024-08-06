@@ -197,6 +197,7 @@ public class GameInterfaceLEGamingGrpcService(
 
 		return new PlayerBalanceReply
 		{
+			IsPlayerExist = result.IsPlayerExist,
 			Balance = result.Balance,
 			FreeBalance = result.FreeBalance,
 			OutstandingBalance = result.OutstandingBalance
