@@ -20,6 +20,7 @@ public class GameInterfaceLEGamingClient_PlayerBalanceUnitTest
 
 		var result = new PlayerBalanceResult
 		{
+			IsPlayerExist = true,
 			Balance = 100,
 			FreeBalance = 98
 		};
@@ -54,6 +55,7 @@ public class GameInterfaceLEGamingClient_PlayerBalanceUnitTest
 		var actual = await sut.PlayerBalanceAsync(apiUrl, deskey, md5key, agentId, agentCurrency, playerCode);
 
 		Assert.NotNull(actual);
+		Assert.True(actual.IsPlayerExist);
 		Assert.Equal(100, actual.Balance);
 		Assert.Equal(98, actual.FreeBalance);
 		Assert.Equal(2, actual.OutstandingBalance);
